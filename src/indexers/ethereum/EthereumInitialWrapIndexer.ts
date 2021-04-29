@@ -1,14 +1,15 @@
 import {Logger} from "tslog";
-import {IndexerDependencies} from "./IndexerDependencies";
+import {IndexerDependencies} from "../IndexerDependencies";
 import {Knex} from "knex";
-import {AppState} from "./AppState";
-import {EthereumConfig} from "../configuration";
+import {AppState} from "../state/AppState";
+import {EthereumConfig} from "../../configuration";
 import {ethers} from "ethers";
 import {id} from "ethers/lib/utils";
-import {ERCWrap} from "../domain/ERCWrap";
-import {WrapRepository} from "../repositories/WrapRepository";
-import {Coincap} from "../facades/Coincap";
-import benderTokenList, {BenderToken} from "../domain/BenderTokenList";
+import {EthereumLock} from "../../domain/EthereumLock";
+import {EthereumLockRepository} from "../../repositories/EthereumLockRepository";
+import {Coincap} from "../../facades/Coincap";
+import tokenList from "../../domain/TokenList";
+import {Token} from "../../domain/Token";
 import {BigNumber} from "bignumber.js";
 
 export class EthereumInitialWrapIndexer {
@@ -18,7 +19,7 @@ export class EthereumInitialWrapIndexer {
   private _appState: AppState;
   private _ethereumConfig: EthereumConfig;
   private _ethereumProvider: ethers.providers.Provider;
-  private _wrapRepository: WrapRepository;
+  private _wrapRepository: EthereumLockRepository;
   private _coincap: Coincap;
 
   private static readonly _wrapTopics: string[] = [
@@ -39,7 +40,7 @@ export class EthereumInitialWrapIndexer {
     this._dbClient = dependencies.dbClient;
     this._appState = new AppState(this._dbClient);
     this._ethereumProvider = dependencies.ethereumProvider;
-    this._wrapRepository = new WrapRepository(dependencies.dbClient);
+    this._wrapRepository = new EthereumLockRepository(dependencies.dbClient);
     this._coincap = new Coincap();
   }
 
@@ -127,7 +128,7 @@ export class EthereumInitialWrapIndexer {
     return EthereumInitialWrapIndexer._wrapInterface.parseLog(log);
   }
 
-  private static getWrap(log: ethers.providers.Log, logDescription: ethers.utils.LogDescription, transactionData: ethers.providers.TransactionResponse, receipt: ethers.providers.TransactionReceipt, block: ethers.providers.Block, usdPrice: number): ERCWrap | null {
+  private static getWrap(log: ethers.providers.Log, logDescription: ethers.utils.LogDescription, transactionData: ethers.providers.TransactionResponse, receipt: ethers.providers.TransactionReceipt, block: ethers.providers.Block, usdPrice: number): EthereumLock | null {
 
     const benderToken = EthereumInitialWrapIndexer._getBenderToken(logDescription.args['token'].toLowerCase());
 
@@ -147,9 +148,7 @@ export class EthereumInitialWrapIndexer {
         ethereumTransactionFee: new BigNumber(receipt.gasUsed.mul(transactionData.gasPrice).toString()).shiftedBy(-benderToken.decimals).toNumber(),
         ethereumTimestamp: new Date(block.timestamp * 1000).getTime(),
         ethereumNotionalValue: usdPrice,
-        tezosTo: logDescription.args['tezosDestinationAddress'],
-        status: 'ongoing',
-        step: "locked"
+        tezosTo: logDescription.args['tezosDestinationAddress']
       };
     } else if (logDescription.name === 'ERC721WrapAsked') {
       return {
@@ -167,15 +166,13 @@ export class EthereumInitialWrapIndexer {
         ethereumTransactionFee: new BigNumber(receipt.gasUsed.mul(transactionData.gasPrice).toString()).shiftedBy(-benderToken.decimals).toNumber(),
         ethereumTimestamp: new Date(block.timestamp * 1000).getTime(),
         ethereumNotionalValue: usdPrice,
-        tezosTo: logDescription.args['tezosDestinationAddress'],
-        status: 'ongoing',
-        step: "locked"
+        tezosTo: logDescription.args['tezosDestinationAddress']
       };
     }
     return null;
   }
 
-  private static _getBenderToken(token: string): BenderToken {
-    return benderTokenList.find((elt) => elt.token.toLowerCase() === token.toLowerCase());
+  private static _getBenderToken(token: string): Token {
+    return tokenList.find((elt) => elt.token.toLowerCase() === token.toLowerCase());
   }
 }

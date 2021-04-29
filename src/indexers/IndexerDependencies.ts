@@ -1,11 +1,14 @@
 import {Logger} from "tslog";
 import {Knex} from "knex";
-import {EthereumConfig} from "../configuration";
+import {EthereumConfig, TezosConfig} from "../configuration";
 import {ethers} from "ethers";
+import {TezosToolkit} from "@taquito/taquito";
 
 export type IndexerDependencies = {
   logger: Logger;
   dbClient: Knex;
   ethereumConfiguration: EthereumConfig;
   ethereumProvider: ethers.providers.Provider;
+  tezosConfiguration: TezosConfig;
+  tezosToolkit: TezosToolkit;
 }

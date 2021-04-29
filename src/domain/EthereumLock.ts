@@ -1,8 +1,6 @@
-export type WrapStatus = "ongoing" | "success" | "failure";
-export type WrapStep = "locked" | "signed" | "minted";
 export type ERCType = "ERC20" | "ERC721";
 
-export interface ERCWrap {
+export interface EthereumLock {
   id: string;
   createdAt: number;
   updatedAt: number;
@@ -19,6 +17,4 @@ export interface ERCWrap {
   ethereumTimestamp: number;
   ethereumNotionalValue: number;
   tezosTo: string;
-  status: WrapStatus;
-  step: WrapStep;
 }

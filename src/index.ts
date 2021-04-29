@@ -4,24 +4,40 @@ import {loadConfiguration} from "./configuration";
 import {createDbClient} from "./infrastructure/dbClient";
 import {IndexerDependencies} from "./indexers/IndexerDependencies";
 import {createEthereumProvider} from "./infrastructure/ethereum/ethereumNetworkProvider";
+import {createTezosToolkit} from "./infrastructure/tezos/toolkitProvider";
+import * as dotenv from "dotenv";
+import {httpServer} from "./web/Server";
+
+dotenv.config();
 
 const configuration = loadConfiguration();
 
 const ethereumConfiguration =
   configuration.ethereum.networks[configuration.ethereum.currentNetwork];
 
+const tezosConfiguration = configuration.tezos.networks[configuration.tezos.currentNetwork];
+
 const dependencies: IndexerDependencies = {
   logger: createLogger(configuration),
   dbClient: createDbClient(configuration),
   ethereumConfiguration: ethereumConfiguration,
-  ethereumProvider: createEthereumProvider(ethereumConfiguration)
+  ethereumProvider: createEthereumProvider(ethereumConfiguration),
+  tezosConfiguration: tezosConfiguration,
+  tezosToolkit: createTezosToolkit(tezosConfiguration)
 };
 
 const crontab = scheduleJobs(dependencies);
 crontab.start();
 
+const server = httpServer(dependencies).listen(configuration.http.port, () => {
+  dependencies.logger.info(
+    `Express server started on port: ${configuration.http.port}`
+  );
+});
+
 process.on("SIGTERM", () => {
   dependencies.logger.info("Server stopping...");
   crontab.stop();
+  server.stop();
   process.exit(0);
 });

@@ -1,5 +1,6 @@
 import * as request from "superagent";
-import benderTokenList, {BenderToken} from "../domain/BenderTokenList";
+import tokenList from "../domain/TokenList";
+import {Token} from "../domain/Token";
 import {Logger} from "tslog";
 
 export class Coincap {
@@ -28,7 +29,7 @@ export class Coincap {
     return usdPrice;
   }
 
-  private _getBenderToken(token: string): BenderToken {
-    return benderTokenList.find((elt) => elt.token.toLowerCase() === token.toLowerCase());
+  private _getBenderToken(token: string): Token {
+    return tokenList.find((elt) => elt.token.toLowerCase() === token.toLowerCase());
   }
 }

@@ -150,6 +150,21 @@ export function loadConfiguration(): Config {
             default: "https://edonet.smartpy.io/",
           },
         },
+        mainnet: {
+          quorumContractAddress: {
+            env: 'TEZOS_QUORUM_CONTRACT',
+          },
+          minterContractAddress: {
+            env: 'TEZOS_MINTER_CONTRACT',
+          },
+          confirmationsThreshold: {
+            env: 'TEZOS_CONFIRMATIONS_THRESHOLD',
+            type: 'integer',
+          },
+          rpc: {
+            env: 'TEZOS_RPC',
+          },
+        }
       },
     },
     ipfs: {

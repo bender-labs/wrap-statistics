@@ -1,12 +1,16 @@
+import {ERCType} from "./EthereumLock";
+
 export interface Token {
-  type: "ERC20" | "ERC721";
+  token: string;
   ethereumSymbol: string;
-  ethereumName: string;
-  ethereumContractAddress: string;
-  decimals: string;
-  tezosWrappingContract: string;
-  tezosTokenId?: string;
   tezosSymbol: string;
-  tezosName: string;
-  thumbnailUri?: string;
+  decimals: number;
+  coincapAssetId: string;
+  type: ERCType;
+  // ethereumName: string;
+  // ethereumContractAddress: string;
+  // tezosWrappingContract: string;
+  // tezosTokenId?: string;
+  // tezosName: string;
+  // thumbnailUri?: string;
 }
