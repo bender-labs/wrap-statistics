@@ -9,7 +9,8 @@
     "lint": "eslint . --ext .ts,.tsx",
     "build": "yarn clean && tsc -p tsconfig.release.json",
     "db:up": "knex migrate:latest --cwd build/src/db",
-    "db:down": "knex migrate:down --cwd build/src/db"
+    "db:down": "knex migrate:down --cwd build/src/db",
+    "start": "node build/src/index.js"
   },
   "devDependencies": {
     "@types/node": "^15.0.1",

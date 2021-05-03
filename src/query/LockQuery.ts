@@ -3,20 +3,29 @@ import {EthereumLock} from "../domain/EthereumLock";
 import {Coincap} from "../facades/Coincap";
 import {Logger} from "tslog";
 import BigNumber from "bignumber.js";
+import {EthereumLockDto} from "../web/dto/EthereumLockDto";
+import {AppState} from "../indexers/state/AppState";
+import {EthereumConfig} from "../configuration";
 
 export class LockQuery {
-  private _dbClient: Knex;
-  private _logger: Logger;
+  private readonly _dbClient: Knex;
+  private readonly _logger: Logger;
   private _coincap: Coincap;
+  private _appState: AppState;
+  private _ethereumConfig: EthereumConfig;
 
-  constructor(dbClient: Knex, logger: Logger) {
+  constructor(dbClient: Knex, ethereumConfiguration: EthereumConfig, logger: Logger) {
     this._dbClient = dbClient;
+    this._appState = new AppState(this._dbClient);
     this._logger = logger;
     this._coincap = new Coincap();
+    this._ethereumConfig = ethereumConfiguration;
   }
 
-  async search(ethereumFrom: string, token: string, ethereumSymbol: string, tezosTo: string): Promise<EthereumLock[]> {
-    const locks: EthereumLock[] = await this._dbClient
+  async search(ethereumFrom: string, token: string, ethereumSymbol: string, tezosTo: string): Promise<EthereumLockDto[]> {
+    const lastIndexedEthereumBlock = await this.getLastIndexedEthereumBlock();
+
+    const locks: EthereumLockDto[] = await this._dbClient
       .table<EthereumLock>('locks')
       .select("ethereum_symbol", "token")
       .count({lock_count: "*"})
@@ -41,9 +50,14 @@ export class LockQuery {
 
     await Promise.all(locks.map(async (lock) => {
       const currentUsdPrice = await this._coincap.getUsdPrice(lock.token.toLowerCase(), new Date().getTime(), this._logger);
-      lock["currentUsdTotalValue"] = new BigNumber(currentUsdPrice ).multipliedBy(lock["tokenVolume"]).toString();
+      lock.currentUsdTotalValue = new BigNumber(currentUsdPrice ).multipliedBy(lock["tokenVolume"]).toString();
+      lock.lastIndexedBlock = lastIndexedEthereumBlock;
     }));
 
     return locks;
+  }
+
+  async getLastIndexedEthereumBlock(): Promise<number> {
+    return await this._appState.getEthereumWrapLastIndexedBlockNumber() ?? this._ethereumConfig.firstBlockToIndex;
   }
 }
