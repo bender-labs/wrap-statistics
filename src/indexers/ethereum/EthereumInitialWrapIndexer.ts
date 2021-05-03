@@ -5,7 +5,7 @@ import {AppState} from "../state/AppState";
 import {EthereumConfig} from "../../configuration";
 import {ethers} from "ethers";
 import {id} from "ethers/lib/utils";
-import {EthereumLock} from "../../domain/EthereumLock";
+import {EthereumLock} from "../../domain/events/EthereumLock";
 import {EthereumLockRepository} from "../../repositories/EthereumLockRepository";
 import {Coincap} from "../../facades/Coincap";
 import tokenList from "../../domain/TokenList";
@@ -19,7 +19,7 @@ export class EthereumInitialWrapIndexer {
   private _appState: AppState;
   private _ethereumConfig: EthereumConfig;
   private _ethereumProvider: ethers.providers.Provider;
-  private _wrapRepository: EthereumLockRepository;
+  private _ethereumLockRepository: EthereumLockRepository;
   private _coincap: Coincap;
 
   private static readonly _wrapTopics: string[] = [
@@ -40,7 +40,7 @@ export class EthereumInitialWrapIndexer {
     this._dbClient = dependencies.dbClient;
     this._appState = new AppState(this._dbClient);
     this._ethereumProvider = dependencies.ethereumProvider;
-    this._wrapRepository = new EthereumLockRepository(dependencies.dbClient);
+    this._ethereumLockRepository = new EthereumLockRepository(dependencies.dbClient);
     this._coincap = new Coincap();
   }
 
@@ -58,7 +58,7 @@ export class EthereumInitialWrapIndexer {
       if (rawLogs.length > 0) {
         await this._addEvents(rawLogs, transaction);
       }
-      await this._setLastIndexedBlock(lastBlockNumber, transaction);
+      await this._setLastIndexedBlock(lastBlockNumber + 1, transaction);
       await transaction.commit();
     } catch (e) {
       this._logger.error(`Can't process wrap events ${e.message}`);
@@ -100,7 +100,7 @@ export class EthereumInitialWrapIndexer {
     transaction: Knex.Transaction
   ) {
 
-    const wraps = [];
+    const ethereumLocks = [];
     await Promise.all(rawLogs.map(async (log) => {
       const transactionData = await this._ethereumProvider.getTransaction(log.transactionHash);
       const receipt = await this._ethereumProvider.getTransactionReceipt(log.transactionHash);
@@ -109,16 +109,16 @@ export class EthereumInitialWrapIndexer {
       const usdPrice = await this._coincap.getUsdPrice(logDescription.args['token'].toLowerCase(), new Date(block.timestamp * 1000).getTime(), this._logger);
 
       if (log && logDescription && transactionData && receipt && block) {
-        wraps.push(EthereumInitialWrapIndexer.getWrap(log, logDescription, transactionData, receipt, block, usdPrice));
+        ethereumLocks.push(EthereumInitialWrapIndexer.getEthereumLock(log, logDescription, transactionData, receipt, block, usdPrice));
       }
     }));
 
-    for (const wrap of wraps) {
-      if (wrap) {
-        const exist = await this._wrapRepository.isExist(wrap, transaction);
+    for (const ethereumLock of ethereumLocks) {
+      if (ethereumLock) {
+        const exist = await this._ethereumLockRepository.isExist(ethereumLock, transaction);
 
         if (!exist) {
-          await this._wrapRepository.save(wrap, transaction);
+          await this._ethereumLockRepository.save(ethereumLock, transaction);
         }
       }
     }
@@ -128,7 +128,7 @@ export class EthereumInitialWrapIndexer {
     return EthereumInitialWrapIndexer._wrapInterface.parseLog(log);
   }
 
-  private static getWrap(log: ethers.providers.Log, logDescription: ethers.utils.LogDescription, transactionData: ethers.providers.TransactionResponse, receipt: ethers.providers.TransactionReceipt, block: ethers.providers.Block, usdPrice: number): EthereumLock | null {
+  private static getEthereumLock(log: ethers.providers.Log, logDescription: ethers.utils.LogDescription, transactionData: ethers.providers.TransactionResponse, receipt: ethers.providers.TransactionReceipt, block: ethers.providers.Block, usdPrice: number): EthereumLock | null {
 
     const benderToken = EthereumInitialWrapIndexer._getBenderToken(logDescription.args['token'].toLowerCase());
 

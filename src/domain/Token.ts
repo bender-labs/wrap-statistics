@@ -1,4 +1,4 @@
-import {ERCType} from "./EthereumLock";
+import {ERCType} from "./events/EthereumLock";
 
 export interface Token {
   token: string;

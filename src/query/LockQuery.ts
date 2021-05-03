@@ -1,5 +1,5 @@
 import {Knex} from "knex";
-import {EthereumLock} from "../domain/EthereumLock";
+import {EthereumLock} from "../domain/events/EthereumLock";
 import {Coincap} from "../facades/Coincap";
 import {Logger} from "tslog";
 import BigNumber from "bignumber.js";

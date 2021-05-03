@@ -23,30 +23,30 @@ export async function up(knex: Knex): Promise<void> {
     table.string("key").primary();
     table.string("value");
   });
-  await knex.schema.createTable('tezos_quorum', (table) => {
-    table.string('admin').primary();
-    table.integer('threshold');
+  await knex.schema.createTable("tezos_quorum", (table) => {
+    table.string("admin").primary();
+    table.integer("threshold");
   });
-  await knex.schema.createTable('tezos_quorum_signers', (table) => {
-    table.string('ipns_key').primary();
-    table.string('public_key');
-    table.boolean('active');
+  await knex.schema.createTable("tezos_quorum_signers", (table) => {
+    table.string("ipns_key").primary();
+    table.string("public_key");
+    table.boolean("active");
   });
-  await knex.schema.createTable('ethereum_quorum', (table) => {
-    table.string('admin').primary();
-    table.integer('threshold');
+  await knex.schema.createTable("ethereum_quorum", (table) => {
+    table.string("admin").primary();
+    table.integer("threshold");
   });
-  await knex.schema.createTable('ethereum_quorum_signers', (table) => {
-    table.string('address').primary();
-    table.boolean('active');
+  await knex.schema.createTable("ethereum_quorum_signers", (table) => {
+    table.string("address").primary();
+    table.boolean("active");
   });
 }
 
 export async function down(knex: Knex): Promise<void> {
   await knex.schema.dropTableIfExists("locks");
   await knex.schema.dropTableIfExists("app_state");
-  await knex.schema.dropTableIfExists('tezos_quorum');
-  await knex.schema.dropTableIfExists('tezos_quorum_signers');
-  await knex.schema.dropTableIfExists('ethereum_quorum');
-  await knex.schema.dropTableIfExists('ethereum_quorum_signers');
+  await knex.schema.dropTableIfExists("tezos_quorum");
+  await knex.schema.dropTableIfExists("tezos_quorum_signers");
+  await knex.schema.dropTableIfExists("ethereum_quorum");
+  await knex.schema.dropTableIfExists("ethereum_quorum_signers");
 }

@@ -2,8 +2,8 @@ export type ERCType = "ERC20" | "ERC721";
 
 export interface EthereumLock {
   id: string;
-  createdAt: number;
-  updatedAt: number;
+  createdAt?: number;
+  updatedAt?: number;
   type: ERCType;
   token: string;
   amount?: number;

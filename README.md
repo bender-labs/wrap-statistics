@@ -34,3 +34,17 @@ This endpoint accepts query filters on :
 - token
 - ethereumSymbol
 - tezosTo
+
+## Endpoint http://localhost:3000/v1/wraps/volume
+
+Exposes array of wrapping volume :
+- begin: start of the interval in ms
+- end: start of the interval in ms
+- usd: total locked usd value at the time of locking on the interval
+
+This endpoints accepts query filters on :
+- interval => value "days" or "weeks"
+
+## Endpoint http://localhost:3000/v1/wraps/volume/rolling
+
+Return the wrapped usd volume of the last rolling 24h

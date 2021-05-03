@@ -7,6 +7,7 @@ import {createEthereumProvider} from "./infrastructure/ethereum/ethereumNetworkP
 import {createTezosToolkit} from "./infrastructure/tezos/toolkitProvider";
 import * as dotenv from "dotenv";
 import {httpServer} from "./web/Server";
+import {createIpfsClient} from './infrastructure/ipfsClient';
 
 dotenv.config();
 
@@ -18,7 +19,8 @@ const dependencies: StatisticsDependencies = {
   ethereumProvider: createEthereumProvider(configuration.ethereum.rpc),
   dbClient: createDbClient(configuration),
   tezosConfiguration: configuration.tezos,
-  tezosToolkit: createTezosToolkit(configuration.tezos.rpc)
+  tezosToolkit: createTezosToolkit(configuration.tezos.rpc),
+  ipfsClient: createIpfsClient(configuration)
 };
 
 const crontab = scheduleJobs(dependencies);

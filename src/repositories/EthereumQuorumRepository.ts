@@ -1,5 +1,5 @@
 import {Knex} from 'knex';
-import { EthereumQuorum } from '../domain/EthereumQuorum';
+import { EthereumQuorum } from '../domain/events/EthereumQuorum';
 
 export class EthereumQuorumRepository {
   constructor(dbClient: Knex) {

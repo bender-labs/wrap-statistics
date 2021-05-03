@@ -1,5 +1,5 @@
 import {Knex} from 'knex';
-import {EthereumLock} from '../domain/EthereumLock';
+import {EthereumLock} from '../domain/events/EthereumLock';
 
 export class EthereumLockRepository {
   constructor(dbClient: Knex) {

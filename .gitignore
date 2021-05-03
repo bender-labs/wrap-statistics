@@ -2,3 +2,5 @@ node_modules
 .idea
 build
 .env
+yarn-error.log
+proxy-ipfs.sh

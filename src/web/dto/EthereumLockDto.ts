@@ -1,4 +1,4 @@
-import {EthereumLock} from "../../domain/EthereumLock";
+import {EthereumLock} from "../../domain/events/EthereumLock";
 
 export interface EthereumLockDto extends EthereumLock {
   lockCount: string;

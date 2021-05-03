@@ -1,6 +1,6 @@
 import {Knex} from 'knex';
-import { TezosSigner } from '../domain/TezosSigner';
-import { TezosQuorum } from '../domain/TezosQuorum';
+import { TezosSigner } from '../domain/events/TezosSigner';
+import { TezosQuorum } from '../domain/events/TezosQuorum';
 
 export class TezosQuorumRepository {
   constructor(dbClient: Knex) {
