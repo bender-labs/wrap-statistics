@@ -1,8 +1,8 @@
 import {Router} from "express";
 import LockRouter from "./LockRouter";
-import {IndexerDependencies} from "../../indexers/IndexerDependencies";
+import {StatisticsDependencies} from "../../indexers/StatisticsDependencies";
 
-function baseRouter(dependencies: IndexerDependencies): Router {
+function baseRouter(dependencies: StatisticsDependencies): Router {
   const router = new Router();
   router.use("/locks", LockRouter(dependencies));
   return router;

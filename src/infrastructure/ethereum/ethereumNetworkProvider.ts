@@ -1,8 +1,7 @@
-import { EthereumConfig } from '../../configuration';
-import { ethers } from 'ethers';
+import {ethers} from 'ethers';
 
 export function createEthereumProvider(
-  configuration: EthereumConfig
+  rpcEndpoint: string
 ): ethers.providers.Provider {
-  return new ethers.providers.JsonRpcProvider(configuration.rpc);
+  return new ethers.providers.JsonRpcProvider(rpcEndpoint);
 }

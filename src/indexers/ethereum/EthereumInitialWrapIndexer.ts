@@ -1,5 +1,5 @@
 import {Logger} from "tslog";
-import {IndexerDependencies} from "../IndexerDependencies";
+import {StatisticsDependencies} from "../StatisticsDependencies";
 import {Knex} from "knex";
 import {AppState} from "../state/AppState";
 import {EthereumConfig} from "../../configuration";
@@ -34,7 +34,7 @@ export class EthereumInitialWrapIndexer {
     ]
   );
 
-  constructor(dependencies: IndexerDependencies) {
+  constructor(dependencies: StatisticsDependencies) {
     this._logger = dependencies.logger;
     this._ethereumConfig = dependencies.ethereumConfiguration;
     this._dbClient = dependencies.dbClient;

@@ -4,7 +4,7 @@ import {Knex} from 'knex';
 import {TezosQuorum} from '../../domain/TezosQuorum';
 import {TezosQuorumRepository} from '../../repositories/TezosQuorumRepository';
 import {TezosToolkit} from '@taquito/taquito';
-import {IndexerDependencies} from "../IndexerDependencies";
+import {StatisticsDependencies} from "../StatisticsDependencies";
 
 export class TezosQuorumIndexer {
 
@@ -13,7 +13,7 @@ export class TezosQuorumIndexer {
   private _tezosConfiguration: TezosConfig;
   private _tezosToolkit: TezosToolkit;
 
-  constructor(dependencies: IndexerDependencies) {
+  constructor(dependencies: StatisticsDependencies) {
     this._logger = dependencies.logger;
     this._dbClient = dependencies.dbClient;
     this._tezosConfiguration = dependencies.tezosConfiguration;

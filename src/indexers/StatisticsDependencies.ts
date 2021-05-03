@@ -4,7 +4,7 @@ import {EthereumConfig, TezosConfig} from "../configuration";
 import {ethers} from "ethers";
 import {TezosToolkit} from "@taquito/taquito";
 
-export type IndexerDependencies = {
+export type StatisticsDependencies = {
   logger: Logger;
   dbClient: Knex;
   ethereumConfiguration: EthereumConfig;

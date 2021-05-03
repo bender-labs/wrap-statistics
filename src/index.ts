@@ -2,7 +2,7 @@ import {scheduleJobs} from "./jobs";
 import {createLogger} from "./infrastructure/logger";
 import {loadConfiguration} from "./configuration";
 import {createDbClient} from "./infrastructure/dbClient";
-import {IndexerDependencies} from "./indexers/IndexerDependencies";
+import {StatisticsDependencies} from "./indexers/StatisticsDependencies";
 import {createEthereumProvider} from "./infrastructure/ethereum/ethereumNetworkProvider";
 import {createTezosToolkit} from "./infrastructure/tezos/toolkitProvider";
 import * as dotenv from "dotenv";
@@ -12,18 +12,13 @@ dotenv.config();
 
 const configuration = loadConfiguration();
 
-const ethereumConfiguration =
-  configuration.ethereum.networks[configuration.ethereum.currentNetwork];
-
-const tezosConfiguration = configuration.tezos.networks[configuration.tezos.currentNetwork];
-
-const dependencies: IndexerDependencies = {
+const dependencies: StatisticsDependencies = {
   logger: createLogger(configuration),
+  ethereumConfiguration: configuration.ethereum,
+  ethereumProvider: createEthereumProvider(configuration.ethereum.rpc),
   dbClient: createDbClient(configuration),
-  ethereumConfiguration: ethereumConfiguration,
-  ethereumProvider: createEthereumProvider(ethereumConfiguration),
-  tezosConfiguration: tezosConfiguration,
-  tezosToolkit: createTezosToolkit(tezosConfiguration)
+  tezosConfiguration: configuration.tezos,
+  tezosToolkit: createTezosToolkit(configuration.tezos.rpc)
 };
 
 const crontab = scheduleJobs(dependencies);

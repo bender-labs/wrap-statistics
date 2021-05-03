@@ -4,9 +4,9 @@ import * as cors from 'cors';
 import * as compression from "compression";
 import * as bodyParser from "body-parser";
 import BaseRouter from './routes/Router';
-import {IndexerDependencies} from "../indexers/IndexerDependencies";
+import {StatisticsDependencies} from "../indexers/StatisticsDependencies";
 
-export function httpServer(dependencies: IndexerDependencies): Express {
+export function httpServer(dependencies: StatisticsDependencies): Express {
   const app = express();
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));

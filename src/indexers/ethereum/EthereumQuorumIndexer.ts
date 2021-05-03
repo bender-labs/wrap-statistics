@@ -3,7 +3,7 @@ import {EthereumConfig} from '../../configuration';
 import {Knex} from 'knex';
 import {ethers} from 'ethers';
 import {EthereumQuorumRepository} from '../../repositories/EthereumQuorumRepository';
-import {IndexerDependencies} from "../IndexerDependencies";
+import {StatisticsDependencies} from "../StatisticsDependencies";
 
 export class EthereumQuorumIndexer {
 
@@ -12,7 +12,7 @@ export class EthereumQuorumIndexer {
   private _ethereumProvider: ethers.providers.Provider;
   private _dbClient: Knex;
 
-  constructor(dependencies: IndexerDependencies) {
+  constructor(dependencies: StatisticsDependencies) {
     this._logger = dependencies.logger;
     this._ethereumConfig = dependencies.ethereumConfiguration;
     this._dbClient = dependencies.dbClient;

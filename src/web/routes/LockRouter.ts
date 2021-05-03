@@ -1,5 +1,5 @@
 import {Request, Response, Router} from 'express';
-import {IndexerDependencies} from "../../indexers/IndexerDependencies";
+import {StatisticsDependencies} from "../../indexers/StatisticsDependencies";
 import {LockQuery} from "../../query/LockQuery";
 
 interface Total {
@@ -9,7 +9,7 @@ interface Total {
   currentUsdTotalValue: number;
 }
 
-function buildRouter(dependencies: IndexerDependencies): Router {
+function buildRouter(dependencies: StatisticsDependencies): Router {
   const router = Router();
   const query = new LockQuery(dependencies.dbClient, dependencies.ethereumConfiguration, dependencies.logger);
 
