@@ -9,7 +9,7 @@ const everyMinute = "* * * * *";
 
 export function scheduleJobs(dependencies: StatisticsDependencies): Crontab {
   dependencies.logger.debug("Scheduling jobs");
-  const crontab = new Crontab();
+  const crontab = new Crontab(dependencies);
   crontab.register(() => new EthereumInitialWrapIndexer(dependencies).index(), every10Seconds);
   crontab.register(() => new EthereumQuorumIndexer(dependencies).index(), everyMinute);
   crontab.register(() => new TezosQuorumIndexer(dependencies).index(), everyMinute);

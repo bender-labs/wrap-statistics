@@ -1,9 +1,31 @@
-import {CronJob} from "cron";
+import { CronJob } from 'cron';
+import { Logger } from 'tslog';
+import {StatisticsDependencies} from "../indexers/StatisticsDependencies";
 
 export class Crontab {
+  constructor(dependencies: StatisticsDependencies) {
+    this._logger = dependencies.logger;
+  }
+
   register(job: () => Promise<void>, pattern: string): void {
+    let taskRunning = false;
     this._jobs.push(
-      new CronJob({cronTime: pattern, onTick: job, runOnInit: true})
+      new CronJob({
+        cronTime: pattern,
+        onTick: async () => {
+          if (taskRunning) {
+            this._logger.debug('Task already running');
+            return;
+          }
+          try {
+            taskRunning = true;
+            await job();
+          } finally {
+            taskRunning = false;
+          }
+        },
+        runOnInit: false,
+      })
     );
   }
 
@@ -16,4 +38,5 @@ export class Crontab {
   }
 
   private _jobs: CronJob[] = [];
+  private _logger: Logger;
 }
