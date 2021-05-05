@@ -14,9 +14,9 @@ export async function up(knex: Knex): Promise<void> {
     table.string("ethereum_transaction_hash");
     table.string("ethereum_block_hash");
     table.bigInteger("ethereum_block");
-    table.decimal("ethereum_transaction_fee", 256);
+    table.decimal("ethereum_transaction_fee", 256, 0);
     table.bigInteger("ethereum_timestamp");
-    table.decimal("ethereum_notional_value", 256);
+    table.decimal("ethereum_notional_value", 256, 2);
     table.string("tezos_to");
   });
   await knex.schema.createTable("app_state", (table) => {

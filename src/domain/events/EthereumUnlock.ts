@@ -1,6 +1,6 @@
 import {ERCType} from "./ErcType";
 
-export interface EthereumLock {
+export interface EthereumUnlock {
   id: string;
   createdAt?: number;
   updatedAt?: number;
@@ -9,12 +9,14 @@ export interface EthereumLock {
   amount?: number;
   tokenId?: string;
   ethereumSymbol: string;
-  ethereumFrom: string;
+  ethereumTo: string;
   ethereumTransactionHash: string;
   ethereumBlockHash: string;
   ethereumBlock: number;
   ethereumTransactionFee: string;
   ethereumTimestamp: number;
   ethereumNotionalValue: number;
-  tezosTo: string;
+  tezosOperationHash: string;
+  tezosFrom?: string;
+  success: boolean;
 }

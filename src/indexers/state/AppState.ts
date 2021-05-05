@@ -25,17 +25,17 @@ export class AppState {
     );
   }
 
-  async getErcUnwrapLevelProcessed(): Promise<number | null> {
-    const item = await this._getValue('erc_unwrap_min_level_processed');
+  async getEthereumUnwrapLastIndexedBlockNumber(): Promise<number | null> {
+    const item = await this._getValue('ethereum_unwrap_last_indexed_block');
     return item ? +item.value : null;
   }
 
-  async setErcUnwrapLevelProcessed(
+  async setEthereumUnwrapLastIndexedBlockNumber(
     lastId: number,
     transaction: Knex.Transaction
   ): Promise<void> {
     await this._setValue(
-      {key: 'erc_unwrap_min_level_processed', value: lastId.toString()},
+      {key: 'ethereum_unwrap_last_indexed_block', value: lastId.toString()},
       transaction
     );
   }

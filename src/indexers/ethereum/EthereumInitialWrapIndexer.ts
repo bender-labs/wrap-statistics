@@ -45,15 +45,15 @@ export class EthereumInitialWrapIndexer {
   }
 
   async index(): Promise<void> {
-    const firstBlockNumber = await this.getFirstBlockToIndex();
-    const lastBlockNumber = await this.getLastBlockToIndex(firstBlockNumber);
-    this._logger.debug("Indexing ethereum wraps => " + firstBlockNumber + ":" + lastBlockNumber);
-
-    const rawLogs = await this._getLogs(firstBlockNumber + 1, lastBlockNumber);
-    this._logger.debug(`${rawLogs.length} wrap events to index`);
-
     let transaction;
     try {
+      const firstBlockNumber = await this.getFirstBlockToIndex();
+      const lastBlockNumber = await this.getLastBlockToIndex(firstBlockNumber);
+      this._logger.debug("Indexing ethereum wraps => " + firstBlockNumber + ":" + lastBlockNumber);
+
+      const rawLogs = await this._getLogs(firstBlockNumber + 1, lastBlockNumber);
+      this._logger.debug(`${rawLogs.length} wrap events to index`);
+
       transaction = await this._dbClient.transaction();
       if (rawLogs.length > 0) {
         await this._addEvents(rawLogs, transaction);
@@ -145,7 +145,7 @@ export class EthereumInitialWrapIndexer {
         ethereumTransactionHash: log.transactionHash,
         ethereumBlockHash: log.blockHash,
         ethereumBlock: log.blockNumber,
-        ethereumTransactionFee: new BigNumber(receipt.gasUsed.mul(transactionData.gasPrice).toString()).shiftedBy(-benderToken.decimals).toNumber(),
+        ethereumTransactionFee: receipt.gasUsed.mul(transactionData.gasPrice).toString(),
         ethereumTimestamp: new Date(block.timestamp * 1000).getTime(),
         ethereumNotionalValue: usdPrice,
         tezosTo: logDescription.args['tezosDestinationAddress']
@@ -163,7 +163,7 @@ export class EthereumInitialWrapIndexer {
         ethereumTransactionHash: log.transactionHash,
         ethereumBlockHash: log.blockHash,
         ethereumBlock: log.blockNumber,
-        ethereumTransactionFee: new BigNumber(receipt.gasUsed.mul(transactionData.gasPrice).toString()).shiftedBy(-benderToken.decimals).toNumber(),
+        ethereumTransactionFee: receipt.gasUsed.mul(transactionData.gasPrice).toString(),
         ethereumTimestamp: new Date(block.timestamp * 1000).getTime(),
         ethereumNotionalValue: usdPrice,
         tezosTo: logDescription.args['tezosDestinationAddress']
