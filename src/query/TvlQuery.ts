@@ -1,78 +1,77 @@
 import {Knex} from "knex";
 import {Logger} from "tslog";
-import {EthereumUnlockDto} from "../web/dto/EthereumUnlockDto";
-import {EthereumLockDto} from "../web/dto/EthereumLockDto";
 import {BenderTime} from "../domain/BenderTime";
-import {DateTime} from "luxon";
+import tokenList from "../domain/TokenList";
+import {TvlRepository} from "../repositories/TvlRepository";
+import BigNumber from "bignumber.js";
+import {Token} from "../domain/Token";
+import {NotionalUsdRepository} from "../repositories/NotionalUsdRepository";
 
-interface WrappingVolume {
-  begin: number;
-  end: number;
-  usd: number;
+interface TvlVolume {
+  asset: string;
+  usd: string;
+}
+
+interface IntervalTvlVolume {
+  time: number;
+  data: TvlVolume[];
 }
 
 export class TvlQuery {
   private readonly _dbClient: Knex;
   private readonly _logger: Logger;
   private readonly _benderIntervals: BenderTime;
+  private _tvlRepository: TvlRepository;
+  private _notionalRepository: NotionalUsdRepository;
 
   constructor(dbClient: Knex, logger: Logger) {
     this._dbClient = dbClient;
     this._logger = logger;
     this._benderIntervals = new BenderTime();
+    this._tvlRepository = new TvlRepository(dbClient);
+    this._notionalRepository = new NotionalUsdRepository(dbClient);
   }
 
-  async tvlVolume(interval: string): Promise<WrappingVolume[]> {
-    const wrappingVolumes: WrappingVolume[] = [];
+  async tvlVolume(interval: string): Promise<IntervalTvlVolume[]> {
+    const tvlVolumes: IntervalTvlVolume[] = [];
     const intervals = this._benderIntervals.getIntervals(interval);
 
     for (const interval of intervals) {
-      this._logger.debug(interval.start.toString() + " => " + interval.end.toString());
-
-      const wrappedVolumeOnInterval = await this._getWrappedVolumeFor(interval.start.toMillis(), interval.end.toMillis());
-      const unwrappedVolumeOnInterval = await this._getUnwrappedVolumeFor(interval.start.toMillis(), interval.end.toMillis());
-
-      wrappingVolumes.push({
-        begin: interval.start.toMillis(),
-        end: interval.end.toMillis(),
-        usd: wrappedVolumeOnInterval - unwrappedVolumeOnInterval
-      });
+      tvlVolumes.push(await this.tvlUsdVolumeFor(interval.end.toMillis()));
     }
 
-    return wrappingVolumes;
+    return tvlVolumes;
   }
 
-  async tvlVolumeNow(): Promise<WrappingVolume> {
-    const endTimeOfRollingInterval = DateTime.utc().toMillis();
-    const beginTimeOfRollingInterval = DateTime.utc(2021, 3, 26, 14, 0, 0, 0).toMillis();
-
-    const wrappedVolumeOnInterval = await this._getWrappedVolumeFor(beginTimeOfRollingInterval, endTimeOfRollingInterval);
-    const unwrappedVolumeOnInterval = await this._getUnwrappedVolumeFor(beginTimeOfRollingInterval, endTimeOfRollingInterval);
-
-    return {
-      begin: beginTimeOfRollingInterval,
-      end: endTimeOfRollingInterval,
-      usd: wrappedVolumeOnInterval - unwrappedVolumeOnInterval
+  async tvlUsdVolumeFor(timestamp: number): Promise<IntervalTvlVolume> {
+    const tvlIntervalVolume: IntervalTvlVolume = {
+      time: timestamp,
+      data: []
     };
+    let totalUsdVolume = new BigNumber(0);
+
+    for (const token of tokenList) {
+      const tokenUsdVolume = await this._getTvlVolumeFor(token, timestamp);
+
+      tvlIntervalVolume.data.push({
+        asset: token.ethereumSymbol,
+        usd: tokenUsdVolume.toString()
+      });
+
+      totalUsdVolume = totalUsdVolume.plus(tokenUsdVolume);
+    }
+
+    tvlIntervalVolume.data.push({
+      asset: "TOTAL",
+      usd: totalUsdVolume.toString()
+    });
+
+    return tvlIntervalVolume;
   }
 
-  private async _getWrappedVolumeFor(beginTimeOfRollingInterval: number, endTimeOfRollingInterval: number): Promise<number> {
-    const locks: EthereumLockDto[] = await this._dbClient("locks")
-      .whereBetween("ethereum_timestamp", [beginTimeOfRollingInterval, endTimeOfRollingInterval])
-      .select(this._dbClient.raw("sum(ethereum_notional_value * amount) as lock_usd_total_value"));
-
-    let wrappedVolumeLockUsd = 0;
-    locks.forEach((lock) => wrappedVolumeLockUsd += +lock.lockUsdTotalValue);
-    return wrappedVolumeLockUsd;
-  }
-
-  private async _getUnwrappedVolumeFor(beginTimeOfRollingInterval: number, endTimeOfRollingInterval: number): Promise<number> {
-    const unlocks: EthereumUnlockDto[] = await this._dbClient("unlocks")
-      .whereBetween("ethereum_timestamp", [beginTimeOfRollingInterval, endTimeOfRollingInterval])
-      .select(this._dbClient.raw("sum(ethereum_notional_value * amount) as unlock_usd_total_value"));
-
-    let unwrapVolumeLockUsd = 0;
-    unlocks.forEach((unlock) => unwrapVolumeLockUsd += +unlock.unlockUsdTotalValue);
-    return unwrapVolumeLockUsd;
+  private async _getTvlVolumeFor(token: Token, currentTimestamp: number): Promise<BigNumber> {
+    const tvl = await this._tvlRepository.find(token.ethereumSymbol, currentTimestamp);
+    const notionalValue = await this._notionalRepository.find(token.ethereumSymbol, currentTimestamp);
+    return notionalValue && tvl ? new BigNumber(notionalValue.value).multipliedBy(tvl.value) : new BigNumber(0);
   }
 }

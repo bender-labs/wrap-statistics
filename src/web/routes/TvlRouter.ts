@@ -1,6 +1,7 @@
 import {Request, Response, Router} from 'express';
 import {StatisticsDependencies} from "../../indexers/StatisticsDependencies";
 import {TvlQuery} from "../../query/TvlQuery";
+import {DateTime} from "luxon";
 
 function buildRouter(dependencies: StatisticsDependencies): Router {
   const router = Router();
@@ -13,7 +14,8 @@ function buildRouter(dependencies: StatisticsDependencies): Router {
   });
 
   router.get("/volume/now", async (_req: Request, res: Response) => {
-    return res.json(await tvlQuery.tvlVolumeNow());
+    const endTimeOfRollingInterval = DateTime.utc().toMillis();
+    return res.json(await tvlQuery.tvlUsdVolumeFor(endTimeOfRollingInterval));
   })
 
   return router;
