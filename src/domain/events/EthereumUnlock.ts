@@ -15,7 +15,6 @@ export interface EthereumUnlock {
   ethereumBlock: number;
   ethereumTransactionFee: string;
   ethereumTimestamp: number;
-  ethereumNotionalValue: number;
   tezosOperationHash: string;
   tezosFrom?: string;
   success: boolean;

@@ -1,7 +1,6 @@
 import {StatisticsDependencies} from "../StatisticsDependencies";
 import {AppState} from "../state/AppState";
 import {EthereumUnlockRepository} from "../../repositories/EthereumUnlockRepository";
-import {Coincap} from "../../facades/Coincap";
 import {Logger} from "tslog";
 import {Knex} from "knex";
 import {EthereumConfig} from "../../configuration";
@@ -20,7 +19,6 @@ export class EthereumFinalUnwrapIndexer {
   private _ethereumConfig: EthereumConfig;
   private _ethereumProvider: ethers.providers.Provider;
   private _ethereumUnlockRepository: EthereumUnlockRepository;
-  private _coincap: Coincap;
 
   private static readonly _topics: string[] = [
     id("ExecutionSuccess(bytes32)"),
@@ -42,7 +40,6 @@ export class EthereumFinalUnwrapIndexer {
     this._dbClient = dependencies.dbClient;
     this._appState = new AppState(this._dbClient);
     this._ethereumProvider = dependencies.ethereumProvider;
-    this._coincap = new Coincap();
     this._ethereumUnlockRepository = new EthereumUnlockRepository(dependencies.dbClient);
   }
 
@@ -81,6 +78,8 @@ export class EthereumFinalUnwrapIndexer {
 
   async _setLastIndexedBlock(lastBlockNumber: number, transaction: Knex.Transaction): Promise<void> {
     await this._appState.setEthereumUnwrapLastIndexedBlockNumber(lastBlockNumber, transaction);
+    const block = await this._ethereumProvider.getBlock(lastBlockNumber);
+    await this._appState.setEthereumUnwrapLastIndexedBlockTimestamp(block.timestamp, transaction);
   }
 
   private async _getLogs(fromBlock: number, toBlock: number): Promise<ethers.providers.Log[]> {
@@ -109,11 +108,10 @@ export class EthereumFinalUnwrapIndexer {
       const decodedCallData = EthereumFinalUnwrapIndexer._unlockInterface.decodeFunctionData("execTransaction", transactionData["data"]);
       const benderToken = EthereumFinalUnwrapIndexer._getBenderToken(decodedCallData["to"].toLowerCase());
       const decodedTransferData = EthereumFinalUnwrapIndexer._unlockInterface.decodeFunctionData("transfer", decodedCallData["data"]);
-      const usdPrice = await this._coincap.getUsdPrice(benderToken['token'].toLowerCase(), new Date(block.timestamp * 1000).getTime(), this._logger);
       const receipt = await this._ethereumProvider.getTransactionReceipt(log.transactionHash);
 
-      if (logDescription && decodedCallData && decodedTransferData && receipt && block && usdPrice && transactionData && benderToken) {
-        const ethereumUnlock = EthereumFinalUnwrapIndexer._buildEthereumUnlock(logDescription, decodedCallData, decodedTransferData, receipt, block, usdPrice, transactionData, benderToken);
+      if (logDescription && decodedCallData && decodedTransferData && receipt && block && transactionData && benderToken) {
+        const ethereumUnlock = EthereumFinalUnwrapIndexer._buildEthereumUnlock(logDescription, decodedCallData, decodedTransferData, receipt, block, transactionData, benderToken);
         ethereumUnlocks.push(ethereumUnlock);
       }
     }));
@@ -138,7 +136,6 @@ export class EthereumFinalUnwrapIndexer {
                                       decodedTransferData: ethers.utils.Result,
                                       receipt: ethers.providers.TransactionReceipt,
                                       block: ethers.providers.Block,
-                                      usdPrice: number,
                                       transactionData: ethers.providers.TransactionResponse,
                                       benderToken: Token): EthereumUnlock {
 
@@ -156,7 +153,6 @@ export class EthereumFinalUnwrapIndexer {
       ethereumBlock: transactionData["blockNumber"],
       ethereumTransactionFee: receipt.gasUsed.mul(transactionData.gasPrice).toString(),
       ethereumTimestamp: new Date(block.timestamp * 1000).getTime(),
-      ethereumNotionalValue: usdPrice,
       tezosFrom: "",
       tezosOperationHash: "",
       success: logDescription.name === 'ExecutionSuccess'

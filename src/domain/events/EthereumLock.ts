@@ -15,6 +15,5 @@ export interface EthereumLock {
   ethereumBlock: number;
   ethereumTransactionFee: string;
   ethereumTimestamp: number;
-  ethereumNotionalValue: number;
   tezosTo: string;
 }

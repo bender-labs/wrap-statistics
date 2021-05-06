@@ -7,7 +7,6 @@ import {ethers} from "ethers";
 import {id} from "ethers/lib/utils";
 import {EthereumLock} from "../../domain/events/EthereumLock";
 import {EthereumLockRepository} from "../../repositories/EthereumLockRepository";
-import {Coincap} from "../../facades/Coincap";
 import tokenList from "../../domain/TokenList";
 import {Token} from "../../domain/Token";
 import {BigNumber} from "bignumber.js";
@@ -20,7 +19,6 @@ export class EthereumInitialWrapIndexer {
   private _ethereumConfig: EthereumConfig;
   private _ethereumProvider: ethers.providers.Provider;
   private _ethereumLockRepository: EthereumLockRepository;
-  private _coincap: Coincap;
 
   private static readonly _wrapTopics: string[] = [
     id('ERC20WrapAsked(address,address,uint256,string)'),
@@ -41,7 +39,6 @@ export class EthereumInitialWrapIndexer {
     this._appState = new AppState(this._dbClient);
     this._ethereumProvider = dependencies.ethereumProvider;
     this._ethereumLockRepository = new EthereumLockRepository(dependencies.dbClient);
-    this._coincap = new Coincap();
   }
 
   async index(): Promise<void> {
@@ -70,6 +67,8 @@ export class EthereumInitialWrapIndexer {
 
   async _setLastIndexedBlock(lastBlockNumber: number, transaction: Knex.Transaction): Promise<void> {
     await this._appState.setEthereumWrapLastIndexedBlockNumber(lastBlockNumber, transaction);
+    const block = await this._ethereumProvider.getBlock(lastBlockNumber);
+    await this._appState.setEthereumWrapLastIndexedBlockTimestamp(block.timestamp, transaction);
   }
 
   async getFirstBlockToIndex(): Promise<number> {
@@ -106,10 +105,9 @@ export class EthereumInitialWrapIndexer {
       const receipt = await this._ethereumProvider.getTransactionReceipt(log.transactionHash);
       const block = await this._ethereumProvider.getBlock(transactionData.blockHash);
       const logDescription = EthereumInitialWrapIndexer._parseERCLog(log);
-      const usdPrice = await this._coincap.getUsdPrice(logDescription.args['token'].toLowerCase(), new Date(block.timestamp * 1000).getTime(), this._logger);
 
       if (log && logDescription && transactionData && receipt && block) {
-        ethereumLocks.push(EthereumInitialWrapIndexer.getEthereumLock(log, logDescription, transactionData, receipt, block, usdPrice));
+        ethereumLocks.push(EthereumInitialWrapIndexer.getEthereumLock(log, logDescription, transactionData, receipt, block));
       }
     }));
 
@@ -128,7 +126,7 @@ export class EthereumInitialWrapIndexer {
     return EthereumInitialWrapIndexer._wrapInterface.parseLog(log);
   }
 
-  private static getEthereumLock(log: ethers.providers.Log, logDescription: ethers.utils.LogDescription, transactionData: ethers.providers.TransactionResponse, receipt: ethers.providers.TransactionReceipt, block: ethers.providers.Block, usdPrice: number): EthereumLock | null {
+  private static getEthereumLock(log: ethers.providers.Log, logDescription: ethers.utils.LogDescription, transactionData: ethers.providers.TransactionResponse, receipt: ethers.providers.TransactionReceipt, block: ethers.providers.Block): EthereumLock | null {
 
     const benderToken = EthereumInitialWrapIndexer._getBenderToken(logDescription.args['token'].toLowerCase());
 
@@ -147,7 +145,6 @@ export class EthereumInitialWrapIndexer {
         ethereumBlock: log.blockNumber,
         ethereumTransactionFee: receipt.gasUsed.mul(transactionData.gasPrice).toString(),
         ethereumTimestamp: new Date(block.timestamp * 1000).getTime(),
-        ethereumNotionalValue: usdPrice,
         tezosTo: logDescription.args['tezosDestinationAddress']
       };
     } else if (logDescription.name === 'ERC721WrapAsked') {
@@ -165,7 +162,6 @@ export class EthereumInitialWrapIndexer {
         ethereumBlock: log.blockNumber,
         ethereumTransactionFee: receipt.gasUsed.mul(transactionData.gasPrice).toString(),
         ethereumTimestamp: new Date(block.timestamp * 1000).getTime(),
-        ethereumNotionalValue: usdPrice,
         tezosTo: logDescription.args['tezosDestinationAddress']
       };
     }

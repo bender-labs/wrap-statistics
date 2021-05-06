@@ -18,7 +18,7 @@ export class Coincap {
           const prices = response.body;
           if (prices && prices["data"] && prices["data"].length > 0) {
             usdPrice = +prices["data"][0]["priceUsd"];
-            logger.debug("notional value for token " + token + " at timestamp " + timestamp + " = " + usdPrice);
+            logger.debug("notional value for token " + benderToken.ethereumSymbol + " at timestamp " + timestamp + " = " + usdPrice);
           }
         }
       } catch (err) {

@@ -1,7 +1,7 @@
 import {Knex} from "knex";
 import {Logger} from "tslog";
 import {EthereumLockDto} from "../web/dto/EthereumLockDto";
-import {BenderIntervals} from "../domain/BenderIntervals";
+import {BenderTime} from "../domain/BenderTime";
 import {DateTime} from "luxon";
 
 interface WrappingVolume {
@@ -13,12 +13,12 @@ interface WrappingVolume {
 export class WrapQuery {
   private readonly _dbClient: Knex;
   private readonly _logger: Logger;
-  private readonly _benderIntervals: BenderIntervals;
+  private readonly _benderIntervals: BenderTime;
 
   constructor(dbClient: Knex, logger: Logger) {
     this._dbClient = dbClient;
     this._logger = logger;
-    this._benderIntervals = new BenderIntervals();
+    this._benderIntervals = new BenderTime();
   }
 
   async wrappingVolume(interval: string): Promise<WrappingVolume[]> {

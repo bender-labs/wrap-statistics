@@ -10,6 +10,36 @@ export class AppState {
     this._dbClient = dbClient;
   }
 
+  async getLastTvlIndexingTimestamp(): Promise<number> {
+    const item = await this._getValue('last_tvl_indexing_timestamp');
+    return item ? +item.value : null;
+  }
+
+  async setLastTvlIndexingTimestamp(
+    timestamp: number,
+    transaction: Knex.Transaction
+  ): Promise<void> {
+    await this._setValue(
+      {key: 'last_tvl_indexing_timestamp', value: timestamp.toString()},
+      transaction
+    );
+  }
+
+  async getLastNotionalIndexingTimestamp(): Promise<number> {
+    const item = await this._getValue('last_notional_indexing_timestamp');
+    return item ? +item.value : null;
+  }
+
+  async setLastNotionalIndexingTimestamp(
+    timestamp: number,
+    transaction: Knex.Transaction
+  ): Promise<void> {
+    await this._setValue(
+      {key: 'last_notional_indexing_timestamp', value: timestamp.toString()},
+      transaction
+    );
+  }
+
   async getEthereumWrapLastIndexedBlockNumber(): Promise<number | null> {
     const item = await this._getValue('ethereum_wrap_last_indexed_block');
     return item ? +item.value : null;
@@ -25,6 +55,21 @@ export class AppState {
     );
   }
 
+  async getEthereumWrapLastIndexedBlockTimestamp(): Promise<number | null> {
+    const item = await this._getValue('ethereum_wrap_last_indexed_block_timestamp');
+    return item ? +item.value : null;
+  }
+
+  async setEthereumWrapLastIndexedBlockTimestamp(
+    timestamp: number,
+    transaction: Knex.Transaction
+  ): Promise<void> {
+    await this._setValue(
+      {key: 'ethereum_wrap_last_indexed_block_timestamp', value: timestamp.toString()},
+      transaction
+    );
+  }
+
   async getEthereumUnwrapLastIndexedBlockNumber(): Promise<number | null> {
     const item = await this._getValue('ethereum_unwrap_last_indexed_block');
     return item ? +item.value : null;
@@ -36,6 +81,21 @@ export class AppState {
   ): Promise<void> {
     await this._setValue(
       {key: 'ethereum_unwrap_last_indexed_block', value: lastId.toString()},
+      transaction
+    );
+  }
+
+  async getEthereumUnwrapLastIndexedBlockTimestamp(): Promise<number | null> {
+    const item = await this._getValue('ethereum_unwrap_last_indexed_block_timestamp');
+    return item ? +item.value : null;
+  }
+
+  async setEthereumUnwrapLastIndexedBlockTimestamp(
+    timestamp: number,
+    transaction: Knex.Transaction
+  ): Promise<void> {
+    await this._setValue(
+      {key: 'ethereum_unwrap_last_indexed_block_timestamp', value: timestamp.toString()},
       transaction
     );
   }

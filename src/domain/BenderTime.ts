@@ -1,6 +1,8 @@
 import {DateTime, Interval} from "luxon";
 
-export class BenderIntervals {
+export class BenderTime {
+
+  public static startMs = 1619308800000;
 
   getIntervals(interval: string): Interval[] {
     switch (interval) {
@@ -18,7 +20,7 @@ export class BenderIntervals {
   }
 
   _daysFromLaunch(): number {
-    return DateTime.utc().diff(DateTime.fromMillis(1619308800000), 'day').days;
+    return DateTime.utc().diff(DateTime.fromMillis(BenderTime.startMs), 'day').days;
   }
 
   getIntervalFor(interval: string, currentClosing: DateTime, depth: number): Interval[] {

@@ -27,7 +27,6 @@ export class WrapUpdater {
       type: ethereumLock.type,
       ethereumBlockHash: ethereumLock.ethereumBlockHash,
       ethereumTimestamp: ethereumLock.ethereumTimestamp,
-      ethereumNotionalValue: ethereumLock.ethereumNotionalValue,
       ethereumTransactionFee: ethereumLock.ethereumTransactionFee,
       ethereumTransactionHash: ethereumLock.ethereumTransactionHash,
       tezosTo: ethereumLock.tezosTo,

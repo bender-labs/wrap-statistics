@@ -7,7 +7,7 @@ export async function up(knex: Knex): Promise<void> {
     table.bigInteger("updated_at");
     table.string("type");
     table.string("token");
-    table.decimal("amount", 256);
+    table.decimal("amount", 256, 18);
     table.string("token_id");
     table.string("ethereum_symbol");
     table.string("ethereum_from");
@@ -16,7 +16,6 @@ export async function up(knex: Knex): Promise<void> {
     table.bigInteger("ethereum_block");
     table.decimal("ethereum_transaction_fee", 256, 0);
     table.bigInteger("ethereum_timestamp");
-    table.decimal("ethereum_notional_value", 256, 2);
     table.string("tezos_to");
   });
   await knex.schema.createTable("app_state", (table) => {
