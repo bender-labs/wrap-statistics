@@ -1,6 +1,7 @@
 import {Request, Response, Router} from 'express';
 import {StatisticsDependencies} from "../../indexers/StatisticsDependencies";
 import {WrapQuery} from "../../query/WrapQuery";
+import {DateTime} from "luxon";
 
 function buildRouter(dependencies: StatisticsDependencies): Router {
   const router = Router();
@@ -13,7 +14,9 @@ function buildRouter(dependencies: StatisticsDependencies): Router {
   });
 
   router.get("/volume/rolling", async (_req: Request, res: Response) => {
-    return res.json(await wrapQuery.wrappingRollingVolume());
+    const endTimeOfRollingInterval = DateTime.utc().toMillis();
+    const beginTimeOfRollingInterval = DateTime.utc().minus({days: 1}).toMillis();
+    return res.json(await wrapQuery.wrappingVolumeFor(beginTimeOfRollingInterval, endTimeOfRollingInterval));
   })
 
   return router;
