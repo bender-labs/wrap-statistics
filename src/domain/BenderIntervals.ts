@@ -6,15 +6,19 @@ export class BenderIntervals {
     switch (interval) {
       case "days": {
         const todayClosing = DateTime.utc().set({hour: 14, minute: 0, second: 0, millisecond: 0});
-        return this.getIntervalFor("days", todayClosing, 50);
+        return this.getIntervalFor("days", todayClosing, this._daysFromLaunch());
       }
       case "weeks": {
         const weekClosing = DateTime.utc().startOf("week").set({hour: 14, minute: 0, second: 0, millisecond: 0});
-        return this.getIntervalFor("weeks", weekClosing, 20);
+        return this.getIntervalFor("weeks", weekClosing, this._daysFromLaunch());
       }
       default:
         return [];
     }
+  }
+
+  _daysFromLaunch(): number {
+    return DateTime.utc().diff(DateTime.fromMillis(1619308800000), 'day').days;
   }
 
   getIntervalFor(interval: string, currentClosing: DateTime, depth: number): Interval[] {
