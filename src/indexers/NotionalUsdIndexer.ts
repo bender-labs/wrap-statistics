@@ -38,7 +38,7 @@ export class NotionalUsdIndexer {
         for (const token of tokenList) {
           const usdPrice = await this._coincap.getUsdPrice(token.token, currentIndexingTimeMs, this._logger);
           await this._notionalUsdRepository.save({
-            value: usdPrice ? usdPrice.toString() : "0",
+            value: usdPrice ? usdPrice.toString() : (token.ethereumSymbol === "HUSD" ? "1" : "0"),
             asset: token.ethereumSymbol,
             timestamp: currentIndexingTimeMs
           }, transaction);

@@ -15,6 +15,7 @@ interface WrappingVolume {
 interface IntervalWrappingVolume {
   begin: number;
   end: number;
+  totalUsd: string;
   data: WrappingVolume[];
 }
 
@@ -48,6 +49,7 @@ export class WrapQuery {
     const wrappingRollingVolume: IntervalWrappingVolume = {
       begin: beginTimeOfRollingInterval,
       end: endTimeOfRollingInterval,
+      totalUsd: "0",
       data: []
     };
     let totalUsdVolume = new BigNumber(0);
@@ -63,10 +65,7 @@ export class WrapQuery {
       totalUsdVolume = totalUsdVolume.plus(tokenUsdVolume);
     }
 
-    wrappingRollingVolume.data.push({
-      asset: "TOTAL",
-      usd: totalUsdVolume.toString()
-    });
+    wrappingRollingVolume.totalUsd = totalUsdVolume.toString();
 
     return wrappingRollingVolume;
   }
@@ -74,8 +73,8 @@ export class WrapQuery {
   private async _getUsdVolumeFor(token: Token, beginTimeOfRollingInterval: number, endTimeOfRollingInterval: number): Promise<BigNumber> {
     const beginAmountOnInterval = await this._ethereumLockRepository.sumToken(token, beginTimeOfRollingInterval);
     const endAmountOnInterval = await this._ethereumLockRepository.sumToken(token, endTimeOfRollingInterval);
-    const amountOnInterval = new BigNumber(endAmountOnInterval).minus(beginAmountOnInterval);
     const endOfIntervalNotionalValue = await this._notionalRepository.find(token.ethereumSymbol, endTimeOfRollingInterval);
+    const amountOnInterval = new BigNumber(endAmountOnInterval).minus(beginAmountOnInterval);
     return endOfIntervalNotionalValue ? new BigNumber(endOfIntervalNotionalValue.value).multipliedBy(amountOnInterval) : new BigNumber(0);
   }
 }

@@ -14,6 +14,7 @@ interface TvlVolume {
 
 interface IntervalTvlVolume {
   time: number;
+  totalUsd: string;
   data: TvlVolume[];
 }
 
@@ -46,6 +47,7 @@ export class TvlQuery {
   async tvlUsdVolumeFor(timestamp: number): Promise<IntervalTvlVolume> {
     const tvlIntervalVolume: IntervalTvlVolume = {
       time: timestamp,
+      totalUsd: "0",
       data: []
     };
     let totalUsdVolume = new BigNumber(0);
@@ -61,10 +63,7 @@ export class TvlQuery {
       totalUsdVolume = totalUsdVolume.plus(tokenUsdVolume);
     }
 
-    tvlIntervalVolume.data.push({
-      asset: "TOTAL",
-      usd: totalUsdVolume.toString()
-    });
+    tvlIntervalVolume.totalUsd = totalUsdVolume.toString();
 
     return tvlIntervalVolume;
   }
