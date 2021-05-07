@@ -2,6 +2,7 @@ import {Request, Response, Router} from "express";
 import lockRouter from "./LockRouter";
 import wrapRouter from "./WrapRouter";
 import tvlRouter from "./TvlRouter";
+import statsRouter from "./StatsRouter";
 import {StatisticsDependencies} from "../../indexers/StatisticsDependencies";
 
 function baseRouter(dependencies: StatisticsDependencies): Router {
@@ -12,6 +13,7 @@ function baseRouter(dependencies: StatisticsDependencies): Router {
   router.use("/locks", lockRouter(dependencies));
   router.use("/wraps", wrapRouter(dependencies));
   router.use("/tvl", tvlRouter(dependencies));
+  router.use("/global-stats", statsRouter(dependencies));
   return router;
 }
 

@@ -1,5 +1,6 @@
 import {Knex} from 'knex';
 import {NotionalUsd} from "../domain/NotionalUsd";
+import {Tvl} from "../domain/Tvl";
 
 export class NotionalUsdRepository {
 
@@ -19,6 +20,16 @@ export class NotionalUsdRepository {
       .where({asset: asset})
       .andWhere("timestamp", "<", currentTimestamp)
       .orderBy("timestamp", "desc");
+  }
+
+  async findAll(currentTimestamp: number): Promise<NotionalUsd[]> {
+    const result = await this._dbClient.raw('select t1.* ' +
+      'from notional_usd as t1 inner join ' +
+      '(select max(timestamp) as timestamp, asset ' +
+      'from notional_usd ' +
+      'where timestamp < ? ' +
+      'group by asset) as t2 on t1.timestamp = t2.timestamp and t1.asset = t2.asset', [currentTimestamp]);
+    return result.rows as NotionalUsd[];
   }
 
   private _dbClient: Knex;

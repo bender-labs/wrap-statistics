@@ -18,7 +18,7 @@ interface IntervalTvlVolume {
   data: TvlVolume[];
 }
 
-export class TvlQuery {
+export class GlobalStatsQuery {
   private readonly _dbClient: Knex;
   private readonly _logger: Logger;
   private readonly _benderIntervals: BenderTime;
@@ -52,13 +52,8 @@ export class TvlQuery {
     };
     let totalUsdVolume = new BigNumber(0);
 
-    const tvls = await this._tvlRepository.findAll(timestamp);
-    const notionals = await this._notionalRepository.findAll(timestamp);
-
     for (const token of tokenList) {
-      const tvl = tvls.find(t => t.asset === token.ethereumSymbol);
-      const notionalValue = notionals.find(t => t.asset === token.ethereumSymbol);
-      const tokenUsdVolume = notionalValue && tvl ? new BigNumber(notionalValue.value).multipliedBy(tvl.value) : new BigNumber(0);
+      const tokenUsdVolume = await this._getTvlVolumeFor(token, timestamp);
 
       tvlIntervalVolume.data.push({
         asset: token.ethereumSymbol,
@@ -71,5 +66,11 @@ export class TvlQuery {
     tvlIntervalVolume.totalUsd = totalUsdVolume.toString();
 
     return tvlIntervalVolume;
+  }
+
+  private async _getTvlVolumeFor(token: Token, currentTimestamp: number): Promise<BigNumber> {
+    const tvl = await this._tvlRepository.find(token.ethereumSymbol, currentTimestamp);
+    const notionalValue = await this._notionalRepository.find(token.ethereumSymbol, currentTimestamp);
+    return notionalValue && tvl ? new BigNumber(notionalValue.value).multipliedBy(tvl.value) : new BigNumber(0);
   }
 }

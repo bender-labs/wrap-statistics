@@ -54,8 +54,17 @@ export class WrapQuery {
     };
     let totalUsdVolume = new BigNumber(0);
 
+    const beginSum = await this._ethereumLockRepository.sumAll(beginTimeOfRollingInterval);
+    const endSum = await this._ethereumLockRepository.sumAll(endTimeOfRollingInterval);
+    const endOfIntervalNotionalValues = await this._notionalRepository.findAll(endTimeOfRollingInterval);
+
     for (const token of tokenList) {
-      const tokenUsdVolume = await this._getUsdVolumeFor(token, beginTimeOfRollingInterval, endTimeOfRollingInterval);
+      const beginAmountOnInterval = beginSum.find(s => s.ethereumSymbol === token.ethereumSymbol) ? beginSum.find(s => s.ethereumSymbol === token.ethereumSymbol).value : "0";
+      const endAmountOnInterval = endSum.find(s => s.ethereumSymbol === token.ethereumSymbol) ? endSum.find(s => s.ethereumSymbol === token.ethereumSymbol).value : "0";
+      const endOfIntervalNotionalValue = endOfIntervalNotionalValues.find(v => v.asset === token.ethereumSymbol);
+      const amountOnInterval = new BigNumber(endAmountOnInterval).minus(beginAmountOnInterval);
+      const tokenUsdVolume = endOfIntervalNotionalValue ? new BigNumber(endOfIntervalNotionalValue.value).multipliedBy(amountOnInterval) : new BigNumber(0);
+
 
       wrappingRollingVolume.data.push({
         asset: token.ethereumSymbol,
@@ -68,13 +77,5 @@ export class WrapQuery {
     wrappingRollingVolume.totalUsd = totalUsdVolume.toString();
 
     return wrappingRollingVolume;
-  }
-
-  private async _getUsdVolumeFor(token: Token, beginTimeOfRollingInterval: number, endTimeOfRollingInterval: number): Promise<BigNumber> {
-    const beginAmountOnInterval = await this._ethereumLockRepository.sumToken(token, beginTimeOfRollingInterval);
-    const endAmountOnInterval = await this._ethereumLockRepository.sumToken(token, endTimeOfRollingInterval);
-    const endOfIntervalNotionalValue = await this._notionalRepository.find(token.ethereumSymbol, endTimeOfRollingInterval);
-    const amountOnInterval = new BigNumber(endAmountOnInterval).minus(beginAmountOnInterval);
-    return endOfIntervalNotionalValue ? new BigNumber(endOfIntervalNotionalValue.value).multipliedBy(amountOnInterval) : new BigNumber(0);
   }
 }
