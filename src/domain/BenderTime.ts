@@ -2,7 +2,7 @@ import {DateTime, Interval} from "luxon";
 
 export class BenderTime {
 
-  public static startMs = 1619308800000;
+  public static startMs = 1619445600000;
 
   getIntervals(interval: string): Interval[] {
     switch (interval) {
