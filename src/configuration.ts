@@ -16,6 +16,8 @@ export type TezosConfig = {
   minterContractAddress: string;
   confirmationsThreshold: number;
   rpc: string;
+  quipuswapWrapXtzContractAddress: string;
+  quipuswapWrapXtzFirstBlockToIndex: number;
 };
 
 export type Config = {
@@ -91,6 +93,15 @@ export function loadConfiguration(): Config {
       rpc: {
         env: 'TEZOS_RPC',
       },
+      quipuswapWrapXtzContractAddress: {
+        env: 'TEZOS_QUIPUSWAP_WRAP_XTZ_CONTRACT_ADDRESS',
+        default: 'KT1FG63hhFtMEEEtmBSX2vuFmP87t9E7Ab4t'
+      },
+      quipuswapWrapXtzFirstBlockToIndex: {
+        env: 'TEZOS_QUIPUSWAP_WRAP_XTZ_FIRST_BLOCK_TO_INDEX',
+        type: 'integer',
+        default: 1445751
+      }
     },
     ipfs: {
       nodeUrl: {

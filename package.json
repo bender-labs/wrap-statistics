@@ -26,10 +26,13 @@
   },
   "dependencies": {
     "@arpinum/config": "^2.1.2",
+    "@taquito/michelson-encoder": "^9.0.0",
+    "@taquito/rpc": "^9.0.0",
     "@taquito/taquito": "^9.0.0",
     "@taquito/tzip12": "^9.0.0",
     "@taquito/tzip16": "^9.0.0",
     "async-mutex": "^0.3.1",
+    "axios": "^0.21.1",
     "bignumber.js": "^9.0.1",
     "body-parser": "^1.19.0",
     "compression": "^1.7.4",

@@ -7,6 +7,7 @@ import {SignatureIndexer} from "./indexers/signatures/SignatureIndexer";
 import {EthereumFinalUnwrapIndexer} from "./indexers/ethereum/EthereumFinalUnwrapIndexer";
 import {TotalValueLockedIndexer} from "./indexers/TotalValueLockedIndexer";
 import {NotionalUsdIndexer} from "./indexers/NotionalUsdIndexer";
+import {WrapPriceIndexer} from "./indexers/wrap/WrapPriceIndexer";
 
 const everyMinute = "* * * * *";
 const every15Minutes = "*/15 * * * *";
@@ -21,5 +22,6 @@ export function scheduleJobs(dependencies: StatisticsDependencies): Crontab {
   crontab.register(() => new EthereumFinalUnwrapIndexer(dependencies).index(), everyMinute);
   crontab.register(() => new NotionalUsdIndexer(dependencies).index(), every15Minutes);
   crontab.register(() => new TotalValueLockedIndexer(dependencies).index(), everyMinute);
+  crontab.register(() => new WrapPriceIndexer(dependencies).index(), every15Minutes);
   return crontab;
 }

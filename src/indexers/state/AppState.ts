@@ -116,6 +116,21 @@ export class AppState {
     );
   }
 
+  async getLastQuipuswapIndexedLevel(): Promise<number | null> {
+    const item = await this._getValue('last_quipuswap_indexed_level');
+    return item ? +item.value : null;
+  }
+
+  async setLastQuipuswapIndexedLevel(
+    level: number,
+    transaction: Knex.Transaction
+  ): Promise<void> {
+    await this._setValue(
+      {key: 'last_quipuswap_indexed_level', value: level.toString()},
+      transaction
+    );
+  }
+
   async _getValue(key: string): Promise<AppStateItem | null> {
     return this._dbClient
       .table<AppStateItem>('app_state')
