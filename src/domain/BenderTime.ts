@@ -12,7 +12,7 @@ export class BenderTime {
       }
       case "weeks": {
         const weekClosing = DateTime.utc().startOf("week").set({hour: 14, minute: 0, second: 0, millisecond: 0});
-        return this.getIntervalFor("weeks", weekClosing, this._daysFromLaunch());
+        return this.getIntervalFor("weeks", weekClosing, Math.ceil(this._daysFromLaunch() / 7));
       }
       default:
         return [];

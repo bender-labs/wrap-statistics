@@ -6,10 +6,15 @@ import {GlobalStatsQuery} from "../../query/GlobalStatsQuery";
 
 function buildRouter(dependencies: StatisticsDependencies): Router {
   const router = Router();
-  const tvlQuery = new GlobalStatsQuery(dependencies.dbClient, dependencies.logger);
+  const globalStatsQuery = new GlobalStatsQuery(dependencies.dbClient, dependencies.logger);
 
   router.get('/', async (req: Request, res: Response) => {
-    return res.json([]);
+    if (!req.query.week) {
+      return res.status(400).json({ message: 'MISSING_WEEK' });
+    }
+    const week = req.query.week as string;
+    const result = await globalStatsQuery.statsFor(week);
+    return res.json(result);
   });
 
   return router;

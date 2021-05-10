@@ -62,13 +62,13 @@ export class TvlQuery {
 
       tvlIntervalVolume.data.push({
         asset: token.ethereumSymbol,
-        usd: tokenUsdVolume.toString()
+        usd: tokenUsdVolume.toString(10)
       });
 
       totalUsdVolume = totalUsdVolume.plus(tokenUsdVolume);
     }
 
-    tvlIntervalVolume.totalUsd = totalUsdVolume.toString();
+    tvlIntervalVolume.totalUsd = totalUsdVolume.toString(10);
 
     return tvlIntervalVolume;
   }

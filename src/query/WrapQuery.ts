@@ -68,13 +68,13 @@ export class WrapQuery {
 
       wrappingRollingVolume.data.push({
         asset: token.ethereumSymbol,
-        usd: tokenUsdVolume.toString()
+        usd: tokenUsdVolume.toString(10)
       });
 
       totalUsdVolume = totalUsdVolume.plus(tokenUsdVolume);
     }
 
-    wrappingRollingVolume.totalUsd = totalUsdVolume.toString();
+    wrappingRollingVolume.totalUsd = totalUsdVolume.toString(10);
 
     return wrappingRollingVolume;
   }
