@@ -1,6 +1,6 @@
 import {Knex} from 'knex';
-import { TezosSigner } from '../domain/events/TezosSigner';
-import { TezosQuorum } from '../domain/events/TezosQuorum';
+import {TezosSigner} from '../domain/events/TezosSigner';
+import {TezosQuorum} from '../domain/events/TezosQuorum';
 
 export class TezosQuorumRepository {
   constructor(dbClient: Knex) {
@@ -25,9 +25,9 @@ export class TezosQuorumRepository {
     await this._dbClient
       .table('tezos_quorum')
       .transacting(transaction)
-      .insert({ admin: quorum.admin, threshold: quorum.threshold })
+      .insert({admin: quorum.admin, threshold: quorum.threshold})
       .onConflict('admin' as never)
-      .merge({ threshold: quorum.threshold });
+      .merge({threshold: quorum.threshold});
   }
 
   private async _disableOtherSigners(
@@ -37,7 +37,7 @@ export class TezosQuorumRepository {
     await this._dbClient
       .table('tezos_quorum_signers')
       .transacting(transaction)
-      .update({ active: false })
+      .update({active: false})
       .whereNotIn(
         'public_key',
         quorum.signers.map<string>((s) => s.publicKey)
@@ -53,13 +53,13 @@ export class TezosQuorumRepository {
       .transacting(transaction)
       .insert(signer)
       .onConflict('ipns_key' as never)
-      .merge({ active: true });
+      .merge({active: true});
   }
 
   async getActiveSigners(): Promise<TezosSigner[]> {
     return this._dbClient
       .table<TezosSigner>('tezos_quorum_signers')
-      .where({ active: true });
+      .where({active: true});
   }
 
   async getThreshold(): Promise<number> {

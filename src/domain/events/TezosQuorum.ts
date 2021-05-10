@@ -1,4 +1,4 @@
-import { TezosSigner } from "./TezosSigner";
+import {TezosSigner} from "./TezosSigner";
 
 export interface TezosQuorum {
   admin: string;

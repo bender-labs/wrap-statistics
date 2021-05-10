@@ -5,7 +5,6 @@ import tokenList from "../domain/TokenList";
 import BigNumber from "bignumber.js";
 import {NotionalUsdRepository} from "../repositories/NotionalUsdRepository";
 import {EthereumLockRepository} from "../repositories/EthereumLockRepository";
-import {Token} from "../domain/Token";
 
 interface WrappingVolume {
   asset: string;
@@ -64,7 +63,6 @@ export class WrapQuery {
       const endOfIntervalNotionalValue = endOfIntervalNotionalValues.find(v => v.asset === token.ethereumSymbol);
       const amountOnInterval = new BigNumber(endAmountOnInterval).minus(beginAmountOnInterval);
       const tokenUsdVolume = endOfIntervalNotionalValue ? new BigNumber(endOfIntervalNotionalValue.value).multipliedBy(amountOnInterval) : new BigNumber(0);
-
 
       wrappingRollingVolume.data.push({
         asset: token.ethereumSymbol,

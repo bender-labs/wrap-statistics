@@ -7,6 +7,7 @@ export interface Token {
   decimals: number;
   coincapAssetId: string;
   type: ERCType;
+  allocation: number;
   // ethereumName: string;
   // ethereumContractAddress: string;
   // tezosWrappingContract: string;

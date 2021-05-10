@@ -2,22 +2,24 @@ import {Knex} from "knex";
 import {Logger} from "tslog";
 import {BenderTime} from "../domain/BenderTime";
 import tokenList from "../domain/TokenList";
-import {TvlRepository} from "../repositories/TvlRepository";
 import BigNumber from "bignumber.js";
-import {Token} from "../domain/Token";
 import {NotionalUsdRepository} from "../repositories/NotionalUsdRepository";
 import {EthereumLockRepository} from "../repositories/EthereumLockRepository";
-import {DateTime} from "luxon";
 import {EthereumUnlockRepository} from "../repositories/EthereumUnlockRepository";
+import {globalRewardsUserAllocation, rewards, totalTokenAllocation} from "../domain/Rewards";
 
-interface TokenStats {
+interface TokenGlobalStats {
   asset: string;
-  supply: string;
-  tvl: string;
+  wrapVolume: string;
+  wrapVolumeUsd: string;
+  wrapReward: string;
+  wrapRewardUsd: string;
+  roi: string;
+  apy: string;
 }
 
-interface Stats {
-  tokens: Array<TokenStats>
+interface GlobalStats {
+  tokens: Array<TokenGlobalStats>
 }
 
 export class GlobalStatsQuery {
@@ -26,71 +28,53 @@ export class GlobalStatsQuery {
   private readonly _benderIntervals: BenderTime;
   private _ethereumLockRepository: EthereumLockRepository;
   private _ethereumUnlockRepository: EthereumUnlockRepository;
-  private _tvlRepository: TvlRepository;
   private _notionalRepository: NotionalUsdRepository;
 
   constructor(dbClient: Knex, logger: Logger) {
     this._dbClient = dbClient;
     this._logger = logger;
     this._benderIntervals = new BenderTime();
-    this._tvlRepository = new TvlRepository(dbClient);
     this._notionalRepository = new NotionalUsdRepository(dbClient);
     this._ethereumLockRepository = new EthereumLockRepository(dbClient);
     this._ethereumUnlockRepository = new EthereumUnlockRepository(dbClient);
   }
 
-  async statsFor(week: string): Promise<Stats> {
-    const result: Stats = {
+  async statsFor(start: number, end: number): Promise<GlobalStats> {
+    const result: GlobalStats = {
       tokens: []
-    }
-    const now = DateTime.utc().toMillis();
-    const locks = await this._ethereumLockRepository.sumAll(now);
-    const unlocks = await this._ethereumUnlockRepository.sumAll(now);
-    const tvls = await this._tvlRepository.findAll(now);
-    const notionals = await this._notionalRepository.findAll(now);
-
-    for (const token of tokenList) {
-      const totalLocked = locks.find(s => s.ethereumSymbol === token.ethereumSymbol) ? locks.find(s => s.ethereumSymbol === token.ethereumSymbol).value : "0";
-      const totalUnlocked = unlocks.find(s => s.ethereumSymbol === token.ethereumSymbol) ? unlocks.find(s => s.ethereumSymbol === token.ethereumSymbol).value : "0";
-      const supply = new BigNumber(totalLocked).minus(new BigNumber(totalUnlocked));
-      const notional = notionals.find(v => v.asset === token.ethereumSymbol);
-      const tokenTvl = notional ? new BigNumber(notional.value).multipliedBy(supply) : new BigNumber(0);
-      result.tokens.push({
-        asset: token.ethereumSymbol,
-        supply: supply.toString(10),
-        tvl: tokenTvl.toString(10)
-      });
-    }
-    return result;
-  }
-
-  /*async tvlUsdVolumeFor(timestamp: number): Promise<IntervalTvlVolume> {
-    const tvlIntervalVolume: IntervalTvlVolume = {
-      time: timestamp,
-      totalUsd: "0",
-      data: []
     };
-    let totalUsdVolume = new BigNumber(0);
+
+    const beginSum = await this._ethereumLockRepository.sumAll(start);
+    const endSum = await this._ethereumLockRepository.sumAll(end);
+    const endOfIntervalNotionalValues = await this._notionalRepository.findAll(end);
 
     for (const token of tokenList) {
-      const tokenUsdVolume = await this._getTvlVolumeFor(token, timestamp);
+      if (token.ethereumSymbol !== "WRAP") {
+        const beginAmountOnInterval = beginSum.find(s => s.ethereumSymbol === token.ethereumSymbol) ? beginSum.find(s => s.ethereumSymbol === token.ethereumSymbol).value : "0";
+        const endAmountOnInterval = endSum.find(s => s.ethereumSymbol === token.ethereumSymbol) ? endSum.find(s => s.ethereumSymbol === token.ethereumSymbol).value : "0";
+        const endOfIntervalNotionalValue = endOfIntervalNotionalValues.find(v => v.asset === token.ethereumSymbol);
+        const amountOnInterval = new BigNumber(endAmountOnInterval).minus(beginAmountOnInterval);
+        const tokenUsdVolume = endOfIntervalNotionalValue ? new BigNumber(endOfIntervalNotionalValue.value).multipliedBy(amountOnInterval) : new BigNumber(0);
 
-      tvlIntervalVolume.data.push({
-        asset: token.ethereumSymbol,
-        usd: tokenUsdVolume.toString()
-      });
+        const wrapReward = Math.round(rewards[start] * globalRewardsUserAllocation * (token.allocation / totalTokenAllocation));
+        const wrapUsdValue = 15 * wrapReward;
 
-      totalUsdVolume = totalUsdVolume.plus(tokenUsdVolume);
+        const roi = new BigNumber(wrapUsdValue).dividedBy(tokenUsdVolume);
+        const apy = roi.plus(1).exponentiatedBy(52).minus(1);
+
+        result.tokens.push({
+          asset: token.ethereumSymbol,
+          wrapVolume: amountOnInterval.toString(10),
+          wrapVolumeUsd: tokenUsdVolume.toString(10),
+          wrapReward: wrapReward.toString(),
+          wrapRewardUsd: wrapUsdValue.toString(),
+          roi: roi.toString(10),
+          apy: apy.toString(10)
+        });
+      }
     }
 
-    tvlIntervalVolume.totalUsd = totalUsdVolume.toString();
 
-    return tvlIntervalVolume;
-  }*/
-
-  private async _getTvlVolumeFor(token: Token, currentTimestamp: number): Promise<BigNumber> {
-    const tvl = await this._tvlRepository.find(token.ethereumSymbol, currentTimestamp);
-    const notionalValue = await this._notionalRepository.find(token.ethereumSymbol, currentTimestamp);
-    return notionalValue && tvl ? new BigNumber(notionalValue.value).multipliedBy(tvl.value) : new BigNumber(0);
+    return result;
   }
 }

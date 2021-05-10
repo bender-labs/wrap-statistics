@@ -1,5 +1,5 @@
-import { CronJob } from 'cron';
-import { Logger } from 'tslog';
+import {CronJob} from 'cron';
+import {Logger} from 'tslog';
 import {StatisticsDependencies} from "../indexers/StatisticsDependencies";
 
 export class Crontab {

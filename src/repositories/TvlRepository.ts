@@ -1,6 +1,5 @@
 import {Knex} from 'knex';
 import {Tvl} from "../domain/Tvl";
-import {NotionalUsd} from "../domain/NotionalUsd";
 
 export class TvlRepository {
 
@@ -31,7 +30,6 @@ export class TvlRepository {
       'group by asset) as t2 on t1.timestamp = t2.timestamp and t1.asset = t2.asset', [currentTimestamp]);
     return result.rows as Tvl[];
   }
-
 
 
   private _dbClient: Knex;

@@ -1,5 +1,5 @@
 import {Knex} from 'knex';
-import { EthereumQuorum } from '../domain/events/EthereumQuorum';
+import {EthereumQuorum} from '../domain/events/EthereumQuorum';
 
 export class EthereumQuorumRepository {
   constructor(dbClient: Knex) {
@@ -24,9 +24,9 @@ export class EthereumQuorumRepository {
     await this._dbClient
       .table('ethereum_quorum')
       .transacting(transaction)
-      .insert({ admin: quorum.admin, threshold: quorum.threshold })
+      .insert({admin: quorum.admin, threshold: quorum.threshold})
       .onConflict('admin' as never)
-      .merge({ threshold: quorum.threshold });
+      .merge({threshold: quorum.threshold});
   }
 
   private async _disableOtherSigners(
@@ -36,7 +36,7 @@ export class EthereumQuorumRepository {
     await this._dbClient
       .table('ethereum_quorum_signers')
       .transacting(transaction)
-      .update({ active: false })
+      .update({active: false})
       .whereNotIn('address', quorum.signers);
   }
 
@@ -47,9 +47,9 @@ export class EthereumQuorumRepository {
     await this._dbClient
       .table('ethereum_quorum_signers')
       .transacting(transaction)
-      .insert({ address: signer, active: true })
+      .insert({address: signer, active: true})
       .onConflict('address' as never)
-      .merge({ active: true });
+      .merge({active: true});
   }
 
   async getThreshold(): Promise<number> {

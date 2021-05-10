@@ -1,6 +1,5 @@
 import {Knex} from 'knex';
 import {NotionalUsd} from "../domain/NotionalUsd";
-import {Tvl} from "../domain/Tvl";
 
 export class NotionalUsdRepository {
 

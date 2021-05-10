@@ -4,7 +4,6 @@ import {BenderTime} from "../domain/BenderTime";
 import tokenList from "../domain/TokenList";
 import {TvlRepository} from "../repositories/TvlRepository";
 import BigNumber from "bignumber.js";
-import {Token} from "../domain/Token";
 import {NotionalUsdRepository} from "../repositories/NotionalUsdRepository";
 
 interface TvlVolume {

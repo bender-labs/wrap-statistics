@@ -1,7 +1,5 @@
 import {Request, Response, Router} from 'express';
 import {StatisticsDependencies} from "../../indexers/StatisticsDependencies";
-import {TvlQuery} from "../../query/TvlQuery";
-import {DateTime} from "luxon";
 import {GlobalStatsQuery} from "../../query/GlobalStatsQuery";
 
 function buildRouter(dependencies: StatisticsDependencies): Router {
@@ -9,12 +7,15 @@ function buildRouter(dependencies: StatisticsDependencies): Router {
   const globalStatsQuery = new GlobalStatsQuery(dependencies.dbClient, dependencies.logger);
 
   router.get('/', async (req: Request, res: Response) => {
-    if (!req.query.week) {
-      return res.status(400).json({ message: 'MISSING_WEEK' });
+    if (!req.query.start) {
+      return res.status(400).json({message: 'MISSING_START'});
     }
-    const week = req.query.week as string;
-    const result = await globalStatsQuery.statsFor(week);
-    return res.json(result);
+    if (!req.query.end) {
+      return res.status(400).json({message: 'MISSING_END'});
+    }
+    const start = req.query.start as number;
+    const end = req.query.end as number;
+    return res.json(await globalStatsQuery.statsFor(start, end));
   });
 
   return router;
