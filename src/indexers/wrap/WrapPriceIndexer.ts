@@ -34,7 +34,7 @@ export class WrapPriceIndexer {
     if (currentBlock.level < nextLevel) {
       return;
     }
-    while(nextLevel <= currentBlock.level) {
+    while (nextLevel <= currentBlock.level) {
       this._logger.debug(`Indexing Wrap price for level ${nextLevel}`)
       let transaction;
       try {
@@ -42,7 +42,11 @@ export class WrapPriceIndexer {
         const block = await this._tezosToolkit.rpc.getBlock({block: nextLevel.toString()});
         const blockDate = DateTime.fromISO(block.header.timestamp.toString());
         const valueInTez = await this._getWrapValueInTez(nextLevel);
-        await this._wrapPriceRepository.save({timestamp: blockDate.toMillis(), level: nextLevel, value: valueInTez}, transaction);
+        await this._wrapPriceRepository.save({
+          timestamp: blockDate.toMillis(),
+          level: nextLevel,
+          value: valueInTez
+        }, transaction);
         await this._appState.setLastQuipuswapIndexedLevel(nextLevel, transaction);
         await transaction.commit();
         nextLevel += 10;
@@ -63,7 +67,7 @@ export class WrapPriceIndexer {
     if (Schema.isSchema(schema)) {
       contractSchema = schema;
     } else {
-      contractSchema = Schema.fromRPCResponse({ script: schema as ScriptResponse });
+      contractSchema = Schema.fromRPCResponse({script: schema as ScriptResponse});
     }
     const result = contractSchema.Execute(storage);
     return this._extractWrapValueInTez(

@@ -7,6 +7,7 @@ import {NotionalUsdRepository} from "../repositories/NotionalUsdRepository";
 import {EthereumLockRepository} from "../repositories/EthereumLockRepository";
 import {EthereumUnlockRepository} from "../repositories/EthereumUnlockRepository";
 import {globalRewardsUserAllocation, rewards, totalTokenAllocation} from "../domain/Rewards";
+import {WrapPriceRepository} from "../repositories/WrapPriceRepository";
 
 interface TokenGlobalStats {
   asset: string;
@@ -29,6 +30,7 @@ export class GlobalStatsQuery {
   private _ethereumLockRepository: EthereumLockRepository;
   private _ethereumUnlockRepository: EthereumUnlockRepository;
   private _notionalRepository: NotionalUsdRepository;
+  private _wrapPriceRepository: WrapPriceRepository;
 
   constructor(dbClient: Knex, logger: Logger) {
     this._dbClient = dbClient;
@@ -37,6 +39,7 @@ export class GlobalStatsQuery {
     this._notionalRepository = new NotionalUsdRepository(dbClient);
     this._ethereumLockRepository = new EthereumLockRepository(dbClient);
     this._ethereumUnlockRepository = new EthereumUnlockRepository(dbClient);
+    this._wrapPriceRepository = new WrapPriceRepository(dbClient);
   }
 
   async statsFor(start: number, end: number): Promise<GlobalStats> {
@@ -49,7 +52,7 @@ export class GlobalStatsQuery {
     const endOfIntervalNotionalValues = await this._notionalRepository.findAll(end);
 
     for (const token of tokenList) {
-      if (token.ethereumSymbol !== "WRAP") {
+      if (token.allocation > 0) {
         const beginAmountOnInterval = beginSum.find(s => s.ethereumSymbol === token.ethereumSymbol) ? beginSum.find(s => s.ethereumSymbol === token.ethereumSymbol).value : "0";
         const endAmountOnInterval = endSum.find(s => s.ethereumSymbol === token.ethereumSymbol) ? endSum.find(s => s.ethereumSymbol === token.ethereumSymbol).value : "0";
         const endOfIntervalNotionalValue = endOfIntervalNotionalValues.find(v => v.asset === token.ethereumSymbol);
@@ -57,9 +60,12 @@ export class GlobalStatsQuery {
         const tokenUsdVolume = endOfIntervalNotionalValue ? new BigNumber(endOfIntervalNotionalValue.value).multipliedBy(amountOnInterval) : new BigNumber(0);
 
         const wrapReward = Math.round(rewards[start] * globalRewardsUserAllocation * (token.allocation / totalTokenAllocation));
-        const wrapUsdValue = 15 * wrapReward;
+        const endOfIntervalWrapTezosRatio = await this._wrapPriceRepository.find(end);
+        const endOfIntervalTezosUsdPrice = await this._notionalRepository.find("XTZ", end);
+        const endOfIntervalWrapUsdPrice = new BigNumber(endOfIntervalWrapTezosRatio.value).multipliedBy(endOfIntervalTezosUsdPrice.value);
+        const wrapUsdValue = endOfIntervalWrapUsdPrice.multipliedBy(wrapReward);
 
-        const roi = new BigNumber(wrapUsdValue).dividedBy(tokenUsdVolume);
+        const roi = wrapUsdValue.dividedBy(tokenUsdVolume);
         const apy = roi.plus(1).exponentiatedBy(52).minus(1);
 
         result.tokens.push({

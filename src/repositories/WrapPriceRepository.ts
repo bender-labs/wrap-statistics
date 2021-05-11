@@ -1,5 +1,4 @@
 import {Knex} from 'knex';
-import {Tvl} from "../domain/Tvl";
 import {WrapPrice} from "../domain/WrapPrice";
 
 export class WrapPriceRepository {

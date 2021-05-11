@@ -175,7 +175,7 @@ const tokenList: Token[] = [{
   decimals: 8,
   coincapAssetId: "",
   type: "ERC20",
-  allocation: 1
+  allocation: 0
 }];
 
 export default tokenList;

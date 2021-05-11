@@ -40,6 +40,21 @@ export class AppState {
     );
   }
 
+  async getLastUsdXtzIndexingTimestamp(): Promise<number> {
+    const item = await this._getValue('last_usd_xtz_indexing_timestamp');
+    return item ? +item.value : null;
+  }
+
+  async setLastUsdXtzIndexingTimestamp(
+    timestamp: number,
+    transaction: Knex.Transaction
+  ): Promise<void> {
+    await this._setValue(
+      {key: 'last_usd_xtz_indexing_timestamp', value: timestamp.toString()},
+      transaction
+    );
+  }
+
   async getEthereumWrapLastIndexedBlockNumber(): Promise<number | null> {
     const item = await this._getValue('ethereum_wrap_last_indexed_block');
     return item ? +item.value : null;

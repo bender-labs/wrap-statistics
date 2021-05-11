@@ -49,7 +49,7 @@ export class LockQuery {
       .orderBy("lock_usd_total_value", "desc");
 
     await Promise.all(locks.map(async (lock) => {
-      const currentUsdPrice = await this._coincap.getUsdPrice(lock.token.toLowerCase(), new Date().getTime(), this._logger);
+      const currentUsdPrice = await this._coincap.getUsdPriceForToken(lock.token.toLowerCase(), new Date().getTime(), this._logger);
       lock.currentUsdTotalValue = new BigNumber(currentUsdPrice).multipliedBy(lock["tokenVolume"]).toString();
       lock.lastIndexedBlock = lastIndexedEthereumBlock;
     }));
