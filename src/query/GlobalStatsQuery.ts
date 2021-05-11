@@ -42,6 +42,17 @@ export class GlobalStatsQuery {
     this._wrapPriceRepository = new WrapPriceRepository(dbClient);
   }
 
+  private _getRewardForPeriod(start: number, end: number): number {
+    let result = 0;
+    Object.keys(rewards).forEach(key => {
+      const rewardStart = parseInt(key);
+      if (rewardStart < end && rewardStart >= start) {
+        result += rewards[key];
+      }
+    });
+    return result;
+  }
+
   async statsFor(start: number, end: number): Promise<GlobalStats> {
     const result: GlobalStats = {
       tokens: []
@@ -59,7 +70,7 @@ export class GlobalStatsQuery {
         const amountOnInterval = new BigNumber(endAmountOnInterval).minus(beginAmountOnInterval);
         const tokenUsdVolume = endOfIntervalNotionalValue ? new BigNumber(endOfIntervalNotionalValue.value).multipliedBy(amountOnInterval) : new BigNumber(0);
 
-        const wrapReward = Math.round(rewards[start] * globalRewardsUserAllocation * (token.allocation / totalTokenAllocation));
+        const wrapReward = Math.round(this._getRewardForPeriod(start, end) * globalRewardsUserAllocation * (token.allocation / totalTokenAllocation));
         const endOfIntervalWrapTezosRatio = await this._wrapPriceRepository.find(end);
         const endOfIntervalTezosUsdPrice = await this._notionalRepository.find("XTZ", end);
         const endOfIntervalWrapUsdPrice = new BigNumber(endOfIntervalWrapTezosRatio.value).multipliedBy(endOfIntervalTezosUsdPrice.value);
