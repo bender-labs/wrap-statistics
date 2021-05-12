@@ -1,4 +1,4 @@
-export interface Tvl {
+export interface TotalValueLocked {
   timestamp: number;
   asset: string;
   value: string;

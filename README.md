@@ -1,12 +1,12 @@
 # Wrap statistics
 
-This project watch for Tezos, Ethereum and IPFS to build statistics about the $WRAP protocol.
+This project watches for Tezos, Ethereum and IPFS to build statistics about the $WRAP protocol.
 
 It watches :
-- ERC20/ERC721 locks on Ethereum side
+- ERC20/ERC721 locks and unlocks on Ethereum side
 - Quorum configuration
 - Quorum signers activity on IPFS
-- FA2 Tokens minting on Tezos side
+- FA2 Tokens minting and unminting on Tezos side
 
 # Build and run
 
@@ -19,7 +19,7 @@ node build/src/index.js
 You can access a json http api on http://localhost:3000/[api_version]
 Current api version is "v1"
 
-## Endpoint http://localhost:3000/v1/locks
+## Endpoint [host:port/version]/locks
 
 Exposes :
 - ethereumSymbol = Ethereum token symbol, ie : LINK
@@ -41,10 +41,11 @@ Exposes array of wrapping volume :
 - begin: start of the interval in ms
 - end: start of the interval in ms
 - usd: total locked usd value at the time of locking on the interval
+- data : array of all tokens with their corresponding usd wrapped values
 
 This endpoints accepts query filters on :
 - interval => value "days" or "weeks"
 
 ## Endpoint http://localhost:3000/v1/wraps/volume/rolling
 
-Return the wrapped usd volume of the last rolling 24h
+Return the wrapped usd volume of the last rolling 24h for all tokens

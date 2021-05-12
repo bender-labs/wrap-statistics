@@ -1,10 +1,10 @@
 import {Knex} from "knex";
 import {Logger} from "tslog";
-import {BenderTime} from "../domain/BenderTime";
-import tokenList from "../domain/TokenList";
-import {TvlRepository} from "../repositories/TvlRepository";
+import {BenderTime} from "../../domain/BenderTime";
+import tokenList from "../../domain/TokenList";
+import {TvlRepository} from "../../repositories/TvlRepository";
 import BigNumber from "bignumber.js";
-import {NotionalUsdRepository} from "../repositories/NotionalUsdRepository";
+import {NotionalUsdRepository} from "../../repositories/NotionalUsdRepository";
 
 interface TvlVolume {
   asset: string;
@@ -18,23 +18,18 @@ interface IntervalTvlVolume {
 }
 
 export class TvlQuery {
-  private readonly _dbClient: Knex;
-  private readonly _logger: Logger;
-  private readonly _benderIntervals: BenderTime;
-  private _tvlRepository: TvlRepository;
-  private _notionalRepository: NotionalUsdRepository;
 
   constructor(dbClient: Knex, logger: Logger) {
     this._dbClient = dbClient;
     this._logger = logger;
-    this._benderIntervals = new BenderTime();
+    this._benderTime = new BenderTime();
     this._tvlRepository = new TvlRepository(dbClient);
     this._notionalRepository = new NotionalUsdRepository(dbClient);
   }
 
   async tvlVolume(interval: string): Promise<IntervalTvlVolume[]> {
     const tvlVolumes: IntervalTvlVolume[] = [];
-    const intervals = this._benderIntervals.getIntervals(interval);
+    const intervals = this._benderTime.getIntervals(interval);
 
     for (const interval of intervals) {
       tvlVolumes.push(await this.tvlUsdVolumeFor(interval.end.toMillis()));
@@ -71,4 +66,10 @@ export class TvlQuery {
 
     return tvlIntervalVolume;
   }
+
+  private readonly _dbClient: Knex;
+  private readonly _logger: Logger;
+  private readonly _benderTime: BenderTime;
+  private _tvlRepository: TvlRepository;
+  private _notionalRepository: NotionalUsdRepository;
 }

@@ -1,4 +1,4 @@
-export interface WrapPrice {
+export interface WrapXtzPrice {
   timestamp: number;
   level: number;
   value: string;

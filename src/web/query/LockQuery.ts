@@ -1,22 +1,17 @@
 import {Knex} from "knex";
-import {EthereumLock} from "../domain/events/EthereumLock";
-import {Coincap} from "../facades/Coincap";
+import {EthereumLock} from "../../domain/events/EthereumLock";
+import {Coincap} from "../../facades/Coincap";
 import {Logger} from "tslog";
 import BigNumber from "bignumber.js";
-import {EthereumLockDto} from "../web/dto/EthereumLockDto";
-import {AppState} from "../indexers/state/AppState";
-import {EthereumConfig} from "../configuration";
+import {EthereumLockDto} from "../dto/EthereumLockDto";
+import {AppStateRepository} from "../../repositories/AppStateRepository";
+import {EthereumConfig} from "../../configuration";
 
 export class LockQuery {
-  private readonly _dbClient: Knex;
-  private readonly _logger: Logger;
-  private _coincap: Coincap;
-  private _appState: AppState;
-  private _ethereumConfig: EthereumConfig;
 
   constructor(dbClient: Knex, ethereumConfiguration: EthereumConfig, logger: Logger) {
     this._dbClient = dbClient;
-    this._appState = new AppState(this._dbClient);
+    this._appState = new AppStateRepository(this._dbClient);
     this._logger = logger;
     this._coincap = new Coincap();
     this._ethereumConfig = ethereumConfiguration;
@@ -60,4 +55,10 @@ export class LockQuery {
   async getLastIndexedEthereumBlock(): Promise<number> {
     return await this._appState.getEthereumWrapLastIndexedBlockNumber() ?? this._ethereumConfig.firstBlockToIndex;
   }
+
+  private readonly _dbClient: Knex;
+  private readonly _logger: Logger;
+  private _coincap: Coincap;
+  private _appState: AppStateRepository;
+  private _ethereumConfig: EthereumConfig;
 }

@@ -8,11 +8,6 @@ import {StatisticsDependencies} from "../StatisticsDependencies";
 
 export class TezosQuorumIndexer {
 
-  private _logger: Logger;
-  private _dbClient: Knex;
-  private _tezosConfiguration: TezosConfig;
-  private _tezosToolkit: TezosToolkit;
-
   constructor(dependencies: StatisticsDependencies) {
     this._logger = dependencies.logger;
     this._dbClient = dependencies.dbClient;
@@ -54,4 +49,10 @@ export class TezosQuorumIndexer {
     }
     return {admin, threshold, signers};
   }
+
+  private _logger: Logger;
+  private _dbClient: Knex;
+  private _tezosConfiguration: TezosConfig;
+  private _tezosToolkit: TezosToolkit;
+
 }

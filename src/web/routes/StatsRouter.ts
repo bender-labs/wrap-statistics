@@ -1,6 +1,6 @@
 import {Request, Response, Router} from 'express';
 import {StatisticsDependencies} from "../../indexers/StatisticsDependencies";
-import {GlobalStatsQuery} from "../../query/GlobalStatsQuery";
+import {GlobalStatsQuery} from "../query/GlobalStatsQuery";
 
 function buildRouter(dependencies: StatisticsDependencies): Router {
   const router = Router();

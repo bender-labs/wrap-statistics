@@ -7,18 +7,6 @@ import {StatisticsDependencies} from "../StatisticsDependencies";
 
 export class EthereumQuorumIndexer {
 
-  private _logger: Logger;
-  private _ethereumConfig: EthereumConfig;
-  private _ethereumProvider: ethers.providers.Provider;
-  private _dbClient: Knex;
-
-  constructor(dependencies: StatisticsDependencies) {
-    this._logger = dependencies.logger;
-    this._ethereumConfig = dependencies.ethereumConfiguration;
-    this._dbClient = dependencies.dbClient;
-    this._ethereumProvider = dependencies.ethereumProvider;
-  }
-
   async index(): Promise<void> {
     this._logger.debug(`Indexing ethereum quorum`);
 
@@ -50,5 +38,17 @@ export class EthereumQuorumIndexer {
         transaction.rollback();
       }
     }
+  }
+
+  private _logger: Logger;
+  private _ethereumConfig: EthereumConfig;
+  private _ethereumProvider: ethers.providers.Provider;
+  private _dbClient: Knex;
+
+  constructor(dependencies: StatisticsDependencies) {
+    this._logger = dependencies.logger;
+    this._ethereumConfig = dependencies.ethereumConfiguration;
+    this._dbClient = dependencies.dbClient;
+    this._ethereumProvider = dependencies.ethereumProvider;
   }
 }

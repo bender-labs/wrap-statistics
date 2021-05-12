@@ -1,5 +1,5 @@
 import {StatisticsDependencies} from "../StatisticsDependencies";
-import {AppState} from "../state/AppState";
+import {AppStateRepository} from "../../repositories/AppStateRepository";
 import {EthereumUnlockRepository} from "../../repositories/EthereumUnlockRepository";
 import {Logger} from "tslog";
 import {Knex} from "knex";
@@ -13,32 +13,11 @@ import {BigNumber} from "bignumber.js";
 
 export class EthereumFinalUnwrapIndexer {
 
-  private readonly _logger: Logger;
-  private readonly _dbClient: Knex;
-  private _appState: AppState;
-  private _ethereumConfig: EthereumConfig;
-  private _ethereumProvider: ethers.providers.Provider;
-  private _ethereumUnlockRepository: EthereumUnlockRepository;
-
-  private static readonly _topics: string[] = [
-    id("ExecutionSuccess(bytes32)"),
-    id("ExecutionFailure(bytes32)")
-  ];
-
-  private static readonly _unlockInterface: ethers.utils.Interface = new ethers.utils.Interface(
-    [
-      "function execTransaction(address to,uint256 value,bytes calldata data,string calldata tezosOperation,bytes calldata signatures) external returns (bool success)",
-      "function transfer(address recipient, uint256 amount) public virtual override returns (bool)",
-      "event ExecutionFailure(bytes32 txHash)",
-      "event ExecutionSuccess(bytes32 txHash)"
-    ]
-  );
-
   constructor(dependencies: StatisticsDependencies) {
     this._logger = dependencies.logger;
     this._ethereumConfig = dependencies.ethereumConfiguration;
     this._dbClient = dependencies.dbClient;
-    this._appState = new AppState(this._dbClient);
+    this._appState = new AppStateRepository(this._dbClient);
     this._ethereumProvider = dependencies.ethereumProvider;
     this._ethereumUnlockRepository = new EthereumUnlockRepository(dependencies.dbClient);
   }
@@ -152,7 +131,7 @@ export class EthereumFinalUnwrapIndexer {
       ethereumBlockHash: transactionData["blockHash"],
       ethereumBlock: transactionData["blockNumber"],
       ethereumTransactionFee: receipt.gasUsed.mul(transactionData.gasPrice).toString(),
-      ethereumTimestamp: new Date(block.timestamp * 1000).getTime(),
+      ethereumTimestamp: block.timestamp * 1000,
       tezosFrom: "",
       tezosOperationHash: "",
       success: logDescription.name === 'ExecutionSuccess'
@@ -162,4 +141,25 @@ export class EthereumFinalUnwrapIndexer {
   private static _getBenderToken(token: string): Token {
     return tokenList.find((elt) => elt.token.toLowerCase() === token.toLowerCase());
   }
+
+  private readonly _logger: Logger;
+  private readonly _dbClient: Knex;
+  private _appState: AppStateRepository;
+  private _ethereumConfig: EthereumConfig;
+  private _ethereumProvider: ethers.providers.Provider;
+  private _ethereumUnlockRepository: EthereumUnlockRepository;
+
+  private static readonly _topics: string[] = [
+    id("ExecutionSuccess(bytes32)"),
+    id("ExecutionFailure(bytes32)")
+  ];
+
+  private static readonly _unlockInterface: ethers.utils.Interface = new ethers.utils.Interface(
+    [
+      "function execTransaction(address to,uint256 value,bytes calldata data,string calldata tezosOperation,bytes calldata signatures) external returns (bool success)",
+      "function transfer(address recipient, uint256 amount) public virtual override returns (bool)",
+      "event ExecutionFailure(bytes32 txHash)",
+      "event ExecutionSuccess(bytes32 txHash)"
+    ]
+  );
 }

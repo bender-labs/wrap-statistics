@@ -1,13 +1,13 @@
 import {Knex} from "knex";
 import {Logger} from "tslog";
-import {BenderTime} from "../domain/BenderTime";
-import tokenList from "../domain/TokenList";
+import {BenderTime} from "../../domain/BenderTime";
+import tokenList from "../../domain/TokenList";
 import BigNumber from "bignumber.js";
-import {NotionalUsdRepository} from "../repositories/NotionalUsdRepository";
-import {EthereumLockRepository} from "../repositories/EthereumLockRepository";
-import {EthereumUnlockRepository} from "../repositories/EthereumUnlockRepository";
-import {globalRewardsUserAllocation, rewards, totalTokenAllocation} from "../domain/Rewards";
-import {WrapPriceRepository} from "../repositories/WrapPriceRepository";
+import {NotionalUsdRepository} from "../../repositories/NotionalUsdRepository";
+import {EthereumLockRepository} from "../../repositories/EthereumLockRepository";
+import {EthereumUnlockRepository} from "../../repositories/EthereumUnlockRepository";
+import {globalRewardsUserAllocation, rewards, totalTokenAllocation} from "../../domain/Rewards";
+import {WrapXtzPriceRepository} from "../../repositories/WrapXtzPriceRepository";
 
 interface TokenGlobalStats {
   asset: string;
@@ -34,13 +34,6 @@ interface GlobalStats {
 }
 
 export class GlobalStatsQuery {
-  private readonly _dbClient: Knex;
-  private readonly _logger: Logger;
-  private readonly _benderIntervals: BenderTime;
-  private _ethereumLockRepository: EthereumLockRepository;
-  private _ethereumUnlockRepository: EthereumUnlockRepository;
-  private _notionalRepository: NotionalUsdRepository;
-  private _wrapPriceRepository: WrapPriceRepository;
 
   constructor(dbClient: Knex, logger: Logger) {
     this._dbClient = dbClient;
@@ -49,7 +42,7 @@ export class GlobalStatsQuery {
     this._notionalRepository = new NotionalUsdRepository(dbClient);
     this._ethereumLockRepository = new EthereumLockRepository(dbClient);
     this._ethereumUnlockRepository = new EthereumUnlockRepository(dbClient);
-    this._wrapPriceRepository = new WrapPriceRepository(dbClient);
+    this._wrapPriceRepository = new WrapXtzPriceRepository(dbClient);
   }
 
   private _getRewardForPeriod(start: number, end: number): number {
@@ -124,4 +117,12 @@ export class GlobalStatsQuery {
 
     return result;
   }
+
+  private readonly _dbClient: Knex;
+  private readonly _logger: Logger;
+  private readonly _benderIntervals: BenderTime;
+  private _ethereumLockRepository: EthereumLockRepository;
+  private _ethereumUnlockRepository: EthereumUnlockRepository;
+  private _notionalRepository: NotionalUsdRepository;
+  private _wrapPriceRepository: WrapXtzPriceRepository;
 }

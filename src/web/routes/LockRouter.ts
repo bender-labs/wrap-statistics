@@ -1,6 +1,6 @@
 import {Request, Response, Router} from 'express';
 import {StatisticsDependencies} from "../../indexers/StatisticsDependencies";
-import {LockQuery} from "../../query/LockQuery";
+import {LockQuery} from "../query/LockQuery";
 
 interface Total {
   lastIndexedBlock: number;

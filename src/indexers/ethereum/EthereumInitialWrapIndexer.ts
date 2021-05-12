@@ -1,7 +1,7 @@
 import {Logger} from "tslog";
 import {StatisticsDependencies} from "../StatisticsDependencies";
 import {Knex} from "knex";
-import {AppState} from "../state/AppState";
+import {AppStateRepository} from "../../repositories/AppStateRepository";
 import {EthereumConfig} from "../../configuration";
 import {ethers} from "ethers";
 import {id} from "ethers/lib/utils";
@@ -13,30 +13,11 @@ import {BigNumber} from "bignumber.js";
 
 export class EthereumInitialWrapIndexer {
 
-  private readonly _logger: Logger;
-  private readonly _dbClient: Knex;
-  private _appState: AppState;
-  private _ethereumConfig: EthereumConfig;
-  private _ethereumProvider: ethers.providers.Provider;
-  private _ethereumLockRepository: EthereumLockRepository;
-
-  private static readonly _wrapTopics: string[] = [
-    id('ERC20WrapAsked(address,address,uint256,string)'),
-    id('ERC721WrapAsked(address,address,uint256,string)'),
-  ];
-
-  private static readonly _wrapInterface: ethers.utils.Interface = new ethers.utils.Interface(
-    [
-      'event ERC20WrapAsked(address user, address token, uint256 amount, string tezosDestinationAddress)',
-      'event ERC721WrapAsked(address user, address token, uint256 tokenId, string tezosDestinationAddress)',
-    ]
-  );
-
   constructor(dependencies: StatisticsDependencies) {
     this._logger = dependencies.logger;
     this._ethereumConfig = dependencies.ethereumConfiguration;
     this._dbClient = dependencies.dbClient;
-    this._appState = new AppState(this._dbClient);
+    this._appState = new AppStateRepository(this._dbClient);
     this._ethereumProvider = dependencies.ethereumProvider;
     this._ethereumLockRepository = new EthereumLockRepository(dependencies.dbClient);
   }
@@ -144,7 +125,7 @@ export class EthereumInitialWrapIndexer {
         ethereumBlockHash: log.blockHash,
         ethereumBlock: log.blockNumber,
         ethereumTransactionFee: receipt.gasUsed.mul(transactionData.gasPrice).toString(),
-        ethereumTimestamp: new Date(block.timestamp * 1000).getTime(),
+        ethereumTimestamp: block.timestamp * 1000,
         tezosTo: logDescription.args['tezosDestinationAddress']
       };
     } else if (logDescription.name === 'ERC721WrapAsked') {
@@ -161,7 +142,7 @@ export class EthereumInitialWrapIndexer {
         ethereumBlockHash: log.blockHash,
         ethereumBlock: log.blockNumber,
         ethereumTransactionFee: receipt.gasUsed.mul(transactionData.gasPrice).toString(),
-        ethereumTimestamp: new Date(block.timestamp * 1000).getTime(),
+        ethereumTimestamp: block.timestamp * 1000,
         tezosTo: logDescription.args['tezosDestinationAddress']
       };
     }
@@ -171,4 +152,23 @@ export class EthereumInitialWrapIndexer {
   private static _getBenderToken(token: string): Token {
     return tokenList.find((elt) => elt.token.toLowerCase() === token.toLowerCase());
   }
+
+  private readonly _logger: Logger;
+  private readonly _dbClient: Knex;
+  private _appState: AppStateRepository;
+  private _ethereumConfig: EthereumConfig;
+  private _ethereumProvider: ethers.providers.Provider;
+  private _ethereumLockRepository: EthereumLockRepository;
+
+  private static readonly _wrapTopics: string[] = [
+    id('ERC20WrapAsked(address,address,uint256,string)'),
+    id('ERC721WrapAsked(address,address,uint256,string)'),
+  ];
+
+  private static readonly _wrapInterface: ethers.utils.Interface = new ethers.utils.Interface(
+    [
+      'event ERC20WrapAsked(address user, address token, uint256 amount, string tezosDestinationAddress)',
+      'event ERC721WrapAsked(address user, address token, uint256 tokenId, string tezosDestinationAddress)',
+    ]
+  );
 }

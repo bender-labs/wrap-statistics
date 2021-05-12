@@ -9,8 +9,6 @@ export type LockAggregatedResult = {
 
 export class EthereumLockRepository {
 
-  private _dbClient: Knex;
-
   constructor(dbClient: Knex) {
     this._dbClient = dbClient;
   }
@@ -51,4 +49,6 @@ export class EthereumLockRepository {
       value: r.sum ? r.sum : "0"
     }));
   }
+
+  private _dbClient: Knex;
 }

@@ -1,24 +1,19 @@
-import {StatisticsDependencies} from "./StatisticsDependencies";
+import {StatisticsDependencies} from "../StatisticsDependencies";
 import {Logger} from "tslog";
-import {Coincap} from "../facades/Coincap";
+import {Coincap} from "../../facades/Coincap";
 import {DateTime} from "luxon";
-import {BenderTime} from "../domain/BenderTime";
+import {BenderTime} from "../../domain/BenderTime";
 import {Knex} from "knex";
-import {AppState} from "./state/AppState";
-import tokenList from "../domain/TokenList";
-import {NotionalUsdRepository} from "../repositories/NotionalUsdRepository";
+import {AppStateRepository} from "../../repositories/AppStateRepository";
+import tokenList from "../../domain/TokenList";
+import {NotionalUsdRepository} from "../../repositories/NotionalUsdRepository";
 
 export class NotionalUsdIndexer {
-  private readonly _logger: Logger;
-  private _coincap: Coincap;
-  private _appState: AppState;
-  private _notionalUsdRepository: NotionalUsdRepository;
-  private _dbClient: Knex;
 
   constructor(dependencies: StatisticsDependencies) {
     this._logger = dependencies.logger;
     this._coincap = new Coincap();
-    this._appState = new AppState(dependencies.dbClient);
+    this._appState = new AppStateRepository(dependencies.dbClient);
     this._notionalUsdRepository = new NotionalUsdRepository(dependencies.dbClient);
     this._dbClient = dependencies.dbClient;
   }
@@ -63,4 +58,10 @@ export class NotionalUsdIndexer {
   async _getLastNotionalIndexingTimestamp(): Promise<number> {
     return await this._appState.getLastNotionalIndexingTimestamp() ?? BenderTime.startMs;
   }
+
+  private readonly _logger: Logger;
+  private _coincap: Coincap;
+  private _appState: AppStateRepository;
+  private _notionalUsdRepository: NotionalUsdRepository;
+  private _dbClient: Knex;
 }

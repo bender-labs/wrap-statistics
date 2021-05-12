@@ -4,23 +4,17 @@ import tokenList from "../domain/TokenList";
 import {EthereumLockRepository} from "../repositories/EthereumLockRepository";
 import {EthereumUnlockRepository} from "../repositories/EthereumUnlockRepository";
 import BigNumber from "bignumber.js";
-import {AppState} from "./state/AppState";
+import {AppStateRepository} from "../repositories/AppStateRepository";
 import {Knex} from "knex";
 import {BenderTime} from "../domain/BenderTime";
 import {DateTime} from "luxon";
 import {TvlRepository} from "../repositories/TvlRepository";
 
 export class TotalValueLockedIndexer {
-  private _logger: Logger;
-  private _appState: AppState;
-  private _ethereumLockRepository: EthereumLockRepository;
-  private _ethereumUnlockRepository: EthereumUnlockRepository;
-  private _dbClient: Knex;
-  private _tvlRepository: TvlRepository;
 
   constructor(dependencies: StatisticsDependencies) {
     this._logger = dependencies.logger;
-    this._appState = new AppState(dependencies.dbClient);
+    this._appState = new AppStateRepository(dependencies.dbClient);
     this._ethereumLockRepository = new EthereumLockRepository(dependencies.dbClient);
     this._ethereumUnlockRepository = new EthereumUnlockRepository(dependencies.dbClient);
     this._dbClient = dependencies.dbClient;
@@ -81,4 +75,12 @@ export class TotalValueLockedIndexer {
   async _getLastTvlIndexingTimestamp(): Promise<number> {
     return await this._appState.getLastTvlIndexingTimestamp() ?? BenderTime.startMs;
   }
+
+  private _logger: Logger;
+  private _appState: AppStateRepository;
+  private _ethereumLockRepository: EthereumLockRepository;
+  private _ethereumUnlockRepository: EthereumUnlockRepository;
+  private _dbClient: Knex;
+  private _tvlRepository: TvlRepository;
+
 }

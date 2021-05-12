@@ -2,24 +2,19 @@ import {Logger} from 'tslog';
 import {Knex} from 'knex';
 import {IpfsClient} from '../../infrastructure/ipfsClient';
 import {MintingFailedEvent, UnwrapSignature, WrapSignature} from '../../domain/events/Signature';
-import {AppState} from '../state/AppState';
+import {AppStateRepository} from '../../repositories/AppStateRepository';
 import {TezosSigner} from '../../domain/events/TezosSigner';
 import {SignatureRepository} from '../../repositories/SignatureRepository';
 import {TezosQuorumRepository} from '../../repositories/TezosQuorumRepository';
 import {StatisticsDependencies} from "../StatisticsDependencies";
 
 export class SignatureIndexer {
-  private _logger: Logger;
-  private _ipfsClient: IpfsClient;
-  private readonly _dbClient: Knex;
-  private _appState: AppState;
-  private _SignatureRepository: SignatureRepository;
 
   constructor({logger, ipfsClient, dbClient}: StatisticsDependencies) {
     this._logger = logger;
     this._ipfsClient = ipfsClient;
     this._dbClient = dbClient;
-    this._appState = new AppState(this._dbClient);
+    this._appState = new AppStateRepository(this._dbClient);
     this._SignatureRepository = new SignatureRepository(this._dbClient);
   }
 
@@ -202,4 +197,10 @@ export class SignatureIndexer {
         return null;
     }
   }
+
+  private _logger: Logger;
+  private _ipfsClient: IpfsClient;
+  private readonly _dbClient: Knex;
+  private _appState: AppStateRepository;
+  private _SignatureRepository: SignatureRepository;
 }

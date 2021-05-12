@@ -19,29 +19,8 @@ export async function up(knex: Knex): Promise<void> {
     table.integer("log_index");
     table.string("signer_address");
   });
-  // await knex.schema.createTable("wraps", (table) => {
-  //   table.string("id").primary();
-  //   table.bigInteger("created_at");
-  //   table.bigInteger("updated_at");
-  //   table.string("type");
-  //   table.string("token");
-  //   table.decimal("amount", 256);
-  //   table.string("token_id");
-  //   table.string("ethereum_symbol");
-  //   table.string("ethereum_from");
-  //   table.string("ethereum_transaction_hash");
-  //   table.string("ethereum_block_hash");
-  //   table.bigInteger("ethereum_block");
-  //   table.decimal("ethereum_transaction_fee", 256);
-  //   table.bigInteger("ethereum_timestamp");
-  //   table.decimal("ethereum_notional_value", 256);
-  //   table.string("tezos_to");
-  //   table.bigInteger("signature_count");
-  //   table.string("status");
-  // });
 }
 
 export async function down(knex: Knex): Promise<void> {
   await knex.schema.dropTableIfExists("signatures");
-  // await knex.schema.dropTableIfExists("wraps");
 }

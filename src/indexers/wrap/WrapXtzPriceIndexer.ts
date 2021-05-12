@@ -5,26 +5,20 @@ import {TezosConfig} from "../../configuration";
 import {TezosToolkit} from "@taquito/taquito";
 import BigNumber from "bignumber.js";
 import {DateTime} from "luxon";
-import {AppState} from "../state/AppState";
+import {AppStateRepository} from "../../repositories/AppStateRepository";
 import {Schema} from "@taquito/michelson-encoder";
 import {ScriptResponse} from "@taquito/rpc";
-import {WrapPriceRepository} from "../../repositories/WrapPriceRepository";
+import {WrapXtzPriceRepository} from "../../repositories/WrapXtzPriceRepository";
 
-export class WrapPriceIndexer {
-  private _logger: Logger;
-  private readonly _dbClient: Knex;
-  private _appState: AppState;
-  private _tezosConfiguration: TezosConfig;
-  private _tezosToolkit: TezosToolkit;
-  private _wrapPriceRepository: WrapPriceRepository;
+export class WrapXtzPriceIndexer {
 
   constructor({logger, tezosConfiguration, tezosToolkit, dbClient}: StatisticsDependencies) {
     this._logger = logger;
     this._dbClient = dbClient;
-    this._appState = new AppState(dbClient);
+    this._appState = new AppStateRepository(dbClient);
     this._tezosConfiguration = tezosConfiguration;
     this._tezosToolkit = tezosToolkit;
-    this._wrapPriceRepository = new WrapPriceRepository(dbClient);
+    this._wrapPriceRepository = new WrapXtzPriceRepository(dbClient);
   }
 
   async index(): Promise<void> {
@@ -87,4 +81,12 @@ export class WrapPriceIndexer {
     const result = await this._appState.getLastQuipuswapIndexedLevel();
     return result ? result : this._tezosConfiguration.quipuswapWrapXtzFirstBlockToIndex;
   }
+
+  private _logger: Logger;
+  private readonly _dbClient: Knex;
+  private _appState: AppStateRepository;
+  private _tezosConfiguration: TezosConfig;
+  private _tezosToolkit: TezosToolkit;
+  private _wrapPriceRepository: WrapXtzPriceRepository;
+
 }

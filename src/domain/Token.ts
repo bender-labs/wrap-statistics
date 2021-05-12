@@ -8,10 +8,4 @@ export interface Token {
   coincapAssetId: string;
   type: ERCType;
   allocation: number;
-  // ethereumName: string;
-  // ethereumContractAddress: string;
-  // tezosWrappingContract: string;
-  // tezosTokenId?: string;
-  // tezosName: string;
-  // thumbnailUri?: string;
 }

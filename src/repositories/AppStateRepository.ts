@@ -5,9 +5,24 @@ interface AppStateItem {
   value: string;
 }
 
-export class AppState {
+export class AppStateRepository {
   constructor(dbClient: Knex) {
     this._dbClient = dbClient;
+  }
+
+  async getLastWrappingUsdVolumeBuildTimestamp(): Promise<number> {
+    const item = await this._getValue('last_wrapping_usd_volume_build_timestamp');
+    return item ? +item.value : null;
+  }
+
+  async setLastWrappingUsdVolumeBuildTimestamp(
+    timestamp: number,
+    transaction: Knex.Transaction
+  ): Promise<void> {
+    await this._setValue(
+      {key: 'last_wrapping_usd_volume_build_timestamp', value: timestamp.toString()},
+      transaction
+    );
   }
 
   async getLastTvlIndexingTimestamp(): Promise<number> {

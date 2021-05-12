@@ -75,7 +75,7 @@ export function loadConfiguration(): Config {
       confirmationsThreshold: {
         env: "ETHEREUM_CONFIRMATIONS_THRESHOLD",
         type: "integer",
-        default: 1,
+        default: 275,
       },
     },
     tezos: {

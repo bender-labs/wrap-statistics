@@ -6,12 +6,13 @@ import {TezosQuorumIndexer} from "./indexers/tezos/TezosQuorumIndexer";
 import {SignatureIndexer} from "./indexers/signatures/SignatureIndexer";
 import {EthereumFinalUnwrapIndexer} from "./indexers/ethereum/EthereumFinalUnwrapIndexer";
 import {TotalValueLockedIndexer} from "./indexers/TotalValueLockedIndexer";
-import {NotionalUsdIndexer} from "./indexers/NotionalUsdIndexer";
-import {WrapPriceIndexer} from "./indexers/wrap/WrapPriceIndexer";
-import {XtzUsdIndexer} from "./indexers/XtzUsdIndexer";
+import {NotionalUsdIndexer} from "./indexers/notional/NotionalUsdIndexer";
+import {WrapXtzPriceIndexer} from "./indexers/wrap/WrapXtzPriceIndexer";
+import {XtzUsdIndexer} from "./indexers/notional/XtzUsdIndexer";
+import {WrapUsdVolumeBuilder} from "./projections/WrapUsdVolumeBuilder";
 
 const everyMinute = "* * * * *";
-const every15Minutes = "*/15 * * * *";
+const every5Minutes = "*/5 * * * *";
 
 export function scheduleJobs(dependencies: StatisticsDependencies): Crontab {
   dependencies.logger.debug("Scheduling jobs");
@@ -21,9 +22,10 @@ export function scheduleJobs(dependencies: StatisticsDependencies): Crontab {
   crontab.register(() => new TezosQuorumIndexer(dependencies).index(), everyMinute);
   crontab.register(() => new SignatureIndexer(dependencies).index(), everyMinute);
   crontab.register(() => new EthereumFinalUnwrapIndexer(dependencies).index(), everyMinute);
-  crontab.register(() => new NotionalUsdIndexer(dependencies).index(), every15Minutes);
-  crontab.register(() => new XtzUsdIndexer(dependencies).index(), every15Minutes);
-  crontab.register(() => new TotalValueLockedIndexer(dependencies).index(), everyMinute);
-  crontab.register(() => new WrapPriceIndexer(dependencies).index(), every15Minutes);
+  crontab.register(() => new NotionalUsdIndexer(dependencies).index(), everyMinute);
+  crontab.register(() => new XtzUsdIndexer(dependencies).index(), everyMinute);
+  crontab.register(() => new WrapXtzPriceIndexer(dependencies).index(), everyMinute);
+  crontab.register(() => new TotalValueLockedIndexer(dependencies).index(), every5Minutes);
+  crontab.register(() => new WrapUsdVolumeBuilder(dependencies).build(), every5Minutes);
   return crontab;
 }
