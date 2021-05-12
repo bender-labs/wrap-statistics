@@ -18,8 +18,19 @@ interface TokenGlobalStats {
   roi: string;
 }
 
+interface TokenFeesGlobalStats {
+  asset: string;
+  wrapVolume: string;
+  wrapVolumeUsd: string;
+  unwrapVolume: string;
+  unwrapVolumeUsd: string;
+  fees: string;
+  feesUsd: string;
+}
+
 interface GlobalStats {
   tokens: Array<TokenGlobalStats>
+  fees: Array<TokenFeesGlobalStats>
 }
 
 export class GlobalStatsQuery {
@@ -54,36 +65,58 @@ export class GlobalStatsQuery {
 
   async statsFor(start: number, end: number): Promise<GlobalStats> {
     const result: GlobalStats = {
-      tokens: []
+      tokens: [],
+      fees: []
     };
 
-    const beginSum = await this._ethereumLockRepository.sumAll(start);
-    const endSum = await this._ethereumLockRepository.sumAll(end);
+    const lockBeginSum = await this._ethereumLockRepository.sumAll(start);
+    const lockEndSum = await this._ethereumLockRepository.sumAll(end);
+    const unlockBeginSum = await this._ethereumUnlockRepository.sumAll(start);
+    const unlockEndSum = await this._ethereumUnlockRepository.sumAll(end);
     const endOfIntervalNotionalValues = await this._notionalRepository.findAll(end);
 
     for (const token of tokenList) {
       if (token.allocation > 0) {
-        const beginAmountOnInterval = beginSum.find(s => s.ethereumSymbol === token.ethereumSymbol) ? beginSum.find(s => s.ethereumSymbol === token.ethereumSymbol).value : "0";
-        const endAmountOnInterval = endSum.find(s => s.ethereumSymbol === token.ethereumSymbol) ? endSum.find(s => s.ethereumSymbol === token.ethereumSymbol).value : "0";
         const endOfIntervalNotionalValue = endOfIntervalNotionalValues.find(v => v.asset === token.ethereumSymbol);
-        const amountOnInterval = new BigNumber(endAmountOnInterval).minus(beginAmountOnInterval);
-        const tokenUsdVolume = endOfIntervalNotionalValue ? new BigNumber(endOfIntervalNotionalValue.value).multipliedBy(amountOnInterval) : new BigNumber(0);
+
+        const lockBeginAmountOnInterval = lockBeginSum.find(s => s.ethereumSymbol === token.ethereumSymbol) ? lockBeginSum.find(s => s.ethereumSymbol === token.ethereumSymbol).value : "0";
+        const lockEndAmountOnInterval = lockEndSum.find(s => s.ethereumSymbol === token.ethereumSymbol) ? lockEndSum.find(s => s.ethereumSymbol === token.ethereumSymbol).value : "0";
+        const lockAmountOnInterval = new BigNumber(lockEndAmountOnInterval).minus(lockBeginAmountOnInterval);
+        const wrapUsdVolume = endOfIntervalNotionalValue ? new BigNumber(endOfIntervalNotionalValue.value).multipliedBy(lockAmountOnInterval) : new BigNumber(0);
+
+        const unlockBeginAmountOnInterval = unlockBeginSum.find(s => s.ethereumSymbol === token.ethereumSymbol) ? unlockBeginSum.find(s => s.ethereumSymbol === token.ethereumSymbol).value : "0";
+        const unlockEndAmountOnInterval = unlockEndSum.find(s => s.ethereumSymbol === token.ethereumSymbol) ? unlockEndSum.find(s => s.ethereumSymbol === token.ethereumSymbol).value : "0";
+        const unlockAmountOnInterval = new BigNumber(unlockEndAmountOnInterval).minus(unlockBeginAmountOnInterval);
+        const unwrapUsdVolume = endOfIntervalNotionalValue ? new BigNumber(endOfIntervalNotionalValue.value).multipliedBy(unlockAmountOnInterval) : new BigNumber(0);
+
+        const generatedFees = lockAmountOnInterval.multipliedBy(0.0015).plus(unlockAmountOnInterval.multipliedBy(0.0015));
+        const generatedFeesInUsd = endOfIntervalNotionalValue ? new BigNumber(endOfIntervalNotionalValue.value).multipliedBy(generatedFees) : new BigNumber(0);
 
         const wrapReward = Math.round(this._getRewardForPeriod(start, end) * globalRewardsUserAllocation * (token.allocation / totalTokenAllocation));
         const endOfIntervalWrapTezosRatio = await this._wrapPriceRepository.find(end);
         const endOfIntervalTezosUsdPrice = await this._notionalRepository.find("XTZ", end);
         const endOfIntervalWrapUsdPrice = new BigNumber(endOfIntervalWrapTezosRatio.value).multipliedBy(endOfIntervalTezosUsdPrice.value);
-        const wrapUsdValue = endOfIntervalWrapUsdPrice.multipliedBy(wrapReward);
+        const wrapRewardUsdValue = endOfIntervalWrapUsdPrice.multipliedBy(wrapReward);
 
-        const roi = wrapUsdValue.dividedBy(tokenUsdVolume);
+        const roi = wrapRewardUsdValue.dividedBy(wrapUsdVolume);
 
         result.tokens.push({
           asset: token.ethereumSymbol,
-          wrapVolume: amountOnInterval.toString(10),
-          wrapVolumeUsd: tokenUsdVolume.toString(10),
-          wrapReward: wrapReward.toString(),
-          wrapRewardUsd: wrapUsdValue.toString(),
+          wrapVolume: lockAmountOnInterval.toString(10),
+          wrapVolumeUsd: wrapUsdVolume.toString(10),
+          wrapReward: wrapReward.toString(10),
+          wrapRewardUsd: wrapRewardUsdValue.toString(10),
           roi: roi.toString(10)
+        });
+
+        result.fees.push({
+          asset: token.ethereumSymbol,
+          wrapVolume: lockAmountOnInterval.toString(10),
+          wrapVolumeUsd: wrapUsdVolume.toString(10),
+          unwrapVolume: unlockAmountOnInterval.toString(10),
+          unwrapVolumeUsd: unwrapUsdVolume.toString(10),
+          fees: generatedFees.toString(10),
+          feesUsd: generatedFeesInUsd.toString(10)
         });
       }
     }
