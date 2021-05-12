@@ -16,7 +16,6 @@ interface TokenGlobalStats {
   wrapReward: string;
   wrapRewardUsd: string;
   roi: string;
-  apy: string;
 }
 
 interface GlobalStats {
@@ -77,7 +76,6 @@ export class GlobalStatsQuery {
         const wrapUsdValue = endOfIntervalWrapUsdPrice.multipliedBy(wrapReward);
 
         const roi = wrapUsdValue.dividedBy(tokenUsdVolume);
-        const apy = roi.plus(1).exponentiatedBy(52).minus(1);
 
         result.tokens.push({
           asset: token.ethereumSymbol,
@@ -85,8 +83,7 @@ export class GlobalStatsQuery {
           wrapVolumeUsd: tokenUsdVolume.toString(10),
           wrapReward: wrapReward.toString(),
           wrapRewardUsd: wrapUsdValue.toString(),
-          roi: roi.toString(10),
-          apy: apy.toString(10)
+          roi: roi.toString(10)
         });
       }
     }
