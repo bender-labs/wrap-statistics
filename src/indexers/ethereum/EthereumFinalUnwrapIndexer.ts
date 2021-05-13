@@ -57,7 +57,7 @@ export class EthereumFinalUnwrapIndexer {
       if (rawLogs.length > 0) {
         await this._addEvents(rawLogs, transaction);
       }
-      await this._setLastIndexedBlock(lastBlockNumber + 1, transaction);
+      await this._setLastIndexedBlock(lastBlockNumber, transaction);
       await transaction.commit();
     } catch (e) {
       this._logger.error(`Can't process unwrap events ${e.message}`);

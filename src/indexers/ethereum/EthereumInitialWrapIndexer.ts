@@ -55,7 +55,7 @@ export class EthereumInitialWrapIndexer {
       if (rawLogs.length > 0) {
         await this._addEvents(rawLogs, transaction);
       }
-      await this._setLastIndexedBlock(lastBlockNumber + 1, transaction);
+      await this._setLastIndexedBlock(lastBlockNumber, transaction);
       await transaction.commit();
     } catch (e) {
       this._logger.error(`Can't process wrap events ${e.message}`);
