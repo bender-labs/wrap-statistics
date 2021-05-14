@@ -4,8 +4,8 @@ import {AppStateRepository} from "../repositories/AppStateRepository";
 import {StatisticsDependencies} from "../indexers/StatisticsDependencies";
 import {BenderTime} from "../domain/BenderTime";
 import {DateTime} from "luxon";
-import {WrapUsdVolumeRepository} from "../repositories/WrapUsdVolumeRepository";
-import {RollingWrapUsdVolumeRepository} from "../repositories/RollingWrapUsdVolumeRepository";
+import {ProjectionWrapVolumeRepository} from "../repositories/ProjectionWrapVolumeRepository";
+import {ProjectionRollingWrapVolumeRepository} from "../repositories/ProjectionRollingWrapVolumeRepository";
 import {EthereumLockRepository, LockAggregatedResult} from "../repositories/EthereumLockRepository";
 import {NotionalUsdRepository} from "../repositories/NotionalUsdRepository";
 import tokenList from "../domain/TokenList";
@@ -22,8 +22,8 @@ export class WrapUsdVolumeBuilder {
     this._benderTime = new BenderTime();
     this._ethereumLockRepository = new EthereumLockRepository(dbClient);
     this._notionalRepository = new NotionalUsdRepository(dbClient);
-    this._wrapUsdVolumeRepository = new WrapUsdVolumeRepository(dbClient);
-    this._rollingWrapUsdVolumeRepository = new RollingWrapUsdVolumeRepository(dbClient);
+    this._wrapUsdVolumeRepository = new ProjectionWrapVolumeRepository(dbClient);
+    this._rollingWrapUsdVolumeRepository = new ProjectionRollingWrapVolumeRepository(dbClient);
   }
 
   async build(): Promise<void> {
@@ -75,12 +75,14 @@ export class WrapUsdVolumeBuilder {
     const endOfIntervalNotionalValues = await this._notionalRepository.findAll(currentIndexingTimeMs);
 
     for (const token of tokenList) {
-      const tokenUsdWrapVolume = this._getTokenUsdWrapVolume(token, startWrappingVolumeForAllTokens, endWrappingVolumeForAllTokens, endOfIntervalNotionalValues);
+      const tokenWrapVolume = this._getTokenWrapVolume(token, startWrappingVolumeForAllTokens, endWrappingVolumeForAllTokens);
+      const tokenUsdWrapVolume = this._getTokenUsdWrapVolume(token, tokenWrapVolume, endOfIntervalNotionalValues);
 
       await this._rollingWrapUsdVolumeRepository.save({
         name: "24h",
         asset: token.ethereumSymbol,
-        value: tokenUsdWrapVolume.toString(10)
+        amount: tokenWrapVolume.toString(10),
+        usd_value: tokenUsdWrapVolume.toString(10)
       }, transaction);
     }
   }
@@ -101,23 +103,28 @@ export class WrapUsdVolumeBuilder {
     const endOfIntervalNotionalValues = await this._notionalRepository.findAll(end);
 
     for (const token of tokenList) {
-      const tokenUsdWrapVolume = this._getTokenUsdWrapVolume(token, startWrappingVolumeForAllTokens, endWrappingVolumeForAllTokens, endOfIntervalNotionalValues);
+      const tokenWrapVolume = this._getTokenWrapVolume(token, startWrappingVolumeForAllTokens, endWrappingVolumeForAllTokens);
+      const tokenUsdWrapVolume = this._getTokenUsdWrapVolume(token, tokenWrapVolume, endOfIntervalNotionalValues);
 
       await this._wrapUsdVolumeRepository.save({
         start: start,
         end: end,
         asset: token.ethereumSymbol,
-        value: tokenUsdWrapVolume.toString(10)
+        amount: tokenWrapVolume.toString(10),
+        usd_value: tokenUsdWrapVolume.toString(10)
       }, transaction);
     }
   }
 
-  private _getTokenUsdWrapVolume(token: Token, startWrappingVolumeForAllTokens: LockAggregatedResult[], endWrappingVolumeForAllTokens: LockAggregatedResult[], endOfIntervalNotionalValues: NotionalUsd[]): BigNumber {
+  private _getTokenWrapVolume(token: Token, startWrappingVolumeForAllTokens: LockAggregatedResult[], endWrappingVolumeForAllTokens: LockAggregatedResult[]): BigNumber {
     const startTokenWrappingVolume = startWrappingVolumeForAllTokens.find(s => s.ethereumSymbol === token.ethereumSymbol) ? startWrappingVolumeForAllTokens.find(s => s.ethereumSymbol === token.ethereumSymbol).value : "0";
     const endTokenWrappingVolume = endWrappingVolumeForAllTokens.find(s => s.ethereumSymbol === token.ethereumSymbol) ? endWrappingVolumeForAllTokens.find(s => s.ethereumSymbol === token.ethereumSymbol).value : "0";
+    return new BigNumber(endTokenWrappingVolume).minus(startTokenWrappingVolume);
+  }
+
+  private _getTokenUsdWrapVolume(token: Token, tokenUsdWrapVolume: BigNumber, endOfIntervalNotionalValues: NotionalUsd[]): BigNumber {
     const endOfIntervalTokenNotionalValue = endOfIntervalNotionalValues.find(v => v.asset === token.ethereumSymbol);
-    const tokenWrappingVolumeOnInterval = new BigNumber(endTokenWrappingVolume).minus(startTokenWrappingVolume);
-    return endOfIntervalTokenNotionalValue ? new BigNumber(endOfIntervalTokenNotionalValue.value).multipliedBy(tokenWrappingVolumeOnInterval) : new BigNumber(0);
+    return endOfIntervalTokenNotionalValue ? new BigNumber(endOfIntervalTokenNotionalValue.value).multipliedBy(tokenUsdWrapVolume) : new BigNumber(0);
   }
 
   private async _setLastWrappingUsdVolumeBuildTimestamp(lastNotionalIndexingTimestamp: number, transaction: Knex.Transaction): Promise<void> {
@@ -134,6 +141,6 @@ export class WrapUsdVolumeBuilder {
   private _benderTime: BenderTime;
   private _ethereumLockRepository: EthereumLockRepository;
   private _notionalRepository: NotionalUsdRepository;
-  private _wrapUsdVolumeRepository: WrapUsdVolumeRepository;
-  private _rollingWrapUsdVolumeRepository: RollingWrapUsdVolumeRepository;
+  private _wrapUsdVolumeRepository: ProjectionWrapVolumeRepository;
+  private _rollingWrapUsdVolumeRepository: ProjectionRollingWrapVolumeRepository;
 }

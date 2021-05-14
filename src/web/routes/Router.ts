@@ -1,7 +1,7 @@
 import {Request, Response, Router} from "express";
 import lockRouter from "./LockRouter";
 import wrapRouter from "./WrapRouter";
-import tvlRouter from "./TvlRouter";
+import tvlRouter from "./TotalValueLockedRouter";
 import statsRouter from "./StatsRouter";
 import configurationRouter from "./ConfigurationRouter";
 import {StatisticsDependencies} from "../../indexers/StatisticsDependencies";

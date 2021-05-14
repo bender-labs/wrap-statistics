@@ -1,6 +1,5 @@
 import {Knex} from 'knex';
 import {EthereumUnlock} from '../domain/events/EthereumUnlock';
-import {Token} from "../domain/Token";
 
 export type UnlockAggregatedResult = {
   ethereumSymbol: string;
@@ -28,20 +27,10 @@ export class EthereumUnlockRepository {
     return count[0].count !== '0';
   }
 
-  async sumToken(token: Token, currentTimestamp: number): Promise<string> {
-    const result = await this._dbClient('unlocks')
-      .where("ethereumSymbol", token.ethereumSymbol)
-      .andWhere("success", true)
-      .andWhere("ethereumTimestamp", "<", currentTimestamp)
-      .sum("amount");
-
-    return result[0]["sum"] ? result[0]["sum"] : "0";
-  }
-
   async sumAll(currentTimestamp: number): Promise<UnlockAggregatedResult[]> {
     const result = await this._dbClient('unlocks')
       .select('ethereumSymbol')
-      .where("ethereumTimestamp", "<", currentTimestamp)
+      .where("ethereumTimestamp", "<=", currentTimestamp)
       .andWhere("success", true)
       .sum("amount")
       .groupBy('ethereumSymbol');

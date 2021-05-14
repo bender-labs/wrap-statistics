@@ -17,7 +17,7 @@ export class NotionalUsdRepository {
   async find(asset: string, currentTimestamp: number): Promise<NotionalUsd> {
     return this._dbClient.first("*").from<NotionalUsd>("notional_usd")
       .where({asset: asset})
-      .andWhere("timestamp", "<", currentTimestamp)
+      .andWhere("timestamp", "<=", currentTimestamp)
       .orderBy("timestamp", "desc");
   }
 
@@ -26,7 +26,7 @@ export class NotionalUsdRepository {
       'from notional_usd as t1 inner join ' +
       '(select max(timestamp) as timestamp, asset ' +
       'from notional_usd ' +
-      'where timestamp < ? ' +
+      'where timestamp <= ? ' +
       'group by asset) as t2 on t1.timestamp = t2.timestamp and t1.asset = t2.asset', [currentTimestamp]);
     return result.rows as NotionalUsd[];
   }

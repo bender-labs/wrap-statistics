@@ -5,7 +5,7 @@ import {EthereumQuorumIndexer} from "./indexers/ethereum/EthereumQuorumIndexer";
 import {TezosQuorumIndexer} from "./indexers/tezos/TezosQuorumIndexer";
 import {SignatureIndexer} from "./indexers/signatures/SignatureIndexer";
 import {EthereumFinalUnwrapIndexer} from "./indexers/ethereum/EthereumFinalUnwrapIndexer";
-import {TotalValueLockedIndexer} from "./indexers/TotalValueLockedIndexer";
+import {TotalValueLockedBuilder} from "./projections/TotalValueLockedBuilder";
 import {NotionalUsdIndexer} from "./indexers/notional/NotionalUsdIndexer";
 import {WrapXtzPriceIndexer} from "./indexers/wrap/WrapXtzPriceIndexer";
 import {XtzUsdIndexer} from "./indexers/notional/XtzUsdIndexer";
@@ -25,7 +25,7 @@ export function scheduleJobs(dependencies: StatisticsDependencies): Crontab {
   crontab.register(() => new NotionalUsdIndexer(dependencies).index(), everyMinute);
   crontab.register(() => new XtzUsdIndexer(dependencies).index(), everyMinute);
   crontab.register(() => new WrapXtzPriceIndexer(dependencies).index(), everyMinute);
-  crontab.register(() => new TotalValueLockedIndexer(dependencies).index(), every5Minutes);
+  crontab.register(() => new TotalValueLockedBuilder(dependencies).build(), every5Minutes);
   crontab.register(() => new WrapUsdVolumeBuilder(dependencies).build(), every5Minutes);
   return crontab;
 }

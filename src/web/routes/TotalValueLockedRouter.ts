@@ -1,11 +1,11 @@
 import {Request, Response, Router} from 'express';
 import {StatisticsDependencies} from "../../indexers/StatisticsDependencies";
-import {TvlQuery} from "../query/TvlQuery";
+import {TotalValueLockedQuery} from "../query/TotalValueLockedQuery";
 import {DateTime} from "luxon";
 
 function buildRouter(dependencies: StatisticsDependencies): Router {
   const router = Router();
-  const tvlQuery = new TvlQuery(dependencies.dbClient, dependencies.logger);
+  const tvlQuery = new TotalValueLockedQuery(dependencies.dbClient, dependencies.logger);
 
   router.get('/volume', async (req: Request, res: Response) => {
     const interval = req.query.interval as string;

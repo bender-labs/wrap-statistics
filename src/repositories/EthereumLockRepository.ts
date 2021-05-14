@@ -1,6 +1,5 @@
 import {Knex} from 'knex';
 import {EthereumLock} from '../domain/events/EthereumLock';
-import {Token} from "../domain/Token";
 
 export type LockAggregatedResult = {
   ethereumSymbol: string;
@@ -29,19 +28,10 @@ export class EthereumLockRepository {
     return count[0].count !== '0';
   }
 
-  async sumToken(token: Token, currentTimestamp: number): Promise<string> {
-    const result = await this._dbClient('locks')
-      .where("ethereumSymbol", token.ethereumSymbol)
-      .andWhere("ethereumTimestamp", "<", currentTimestamp)
-      .sum("amount");
-
-    return result[0]["sum"] ? result[0]["sum"] : "0";
-  }
-
   async sumAll(currentTimestamp: number): Promise<LockAggregatedResult[]> {
     const result = await this._dbClient('locks')
       .select('ethereumSymbol')
-      .where("ethereumTimestamp", "<", currentTimestamp)
+      .where("ethereumTimestamp", "<=", currentTimestamp)
       .sum("amount")
       .groupBy('ethereumSymbol');
     return result.map(r => ({

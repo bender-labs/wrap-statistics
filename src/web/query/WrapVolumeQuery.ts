@@ -2,23 +2,23 @@ import {Knex} from "knex";
 import {Logger} from "tslog";
 import {BenderTime} from "../../domain/BenderTime";
 import BigNumber from "bignumber.js";
-import {WrapUsdVolumeRepository} from "../../repositories/WrapUsdVolumeRepository";
-import {RollingWrapUsdVolumeRepository} from "../../repositories/RollingWrapUsdVolumeRepository";
-import {WrapUsdVolumeDto} from "../dto/WrapUsdVolumeDto";
+import {ProjectionWrapVolumeRepository} from "../../repositories/ProjectionWrapVolumeRepository";
+import {ProjectionRollingWrapVolumeRepository} from "../../repositories/ProjectionRollingWrapVolumeRepository";
+import {ProjectionWrapVolumeDto} from "../dto/ProjectionWrapVolumeDto";
 import {DateTime} from "luxon";
 
 interface IntervalWrappingVolume {
   begin: number;
   end: number;
   totalUsd: string;
-  data: WrapUsdVolumeDto[];
+  data: ProjectionWrapVolumeDto[];
 }
 
 interface RollingIntervalWrappingVolume {
   timestamp: number;
   name: string;
   totalUsd: string;
-  data: WrapUsdVolumeDto[];
+  data: ProjectionWrapVolumeDto[];
 }
 
 export class WrapVolumeQuery {
@@ -27,8 +27,8 @@ export class WrapVolumeQuery {
     this._dbClient = dbClient;
     this._logger = logger;
     this._benderIntervals = new BenderTime();
-    this._wrapUsdVolumeRepository = new WrapUsdVolumeRepository(dbClient);
-    this._rollingWrapUsdVolumeRepository = new RollingWrapUsdVolumeRepository(dbClient);
+    this._wrapUsdVolumeRepository = new ProjectionWrapVolumeRepository(dbClient);
+    this._rollingWrapUsdVolumeRepository = new ProjectionRollingWrapVolumeRepository(dbClient);
   }
 
   async wrappingVolume(interval: string): Promise<IntervalWrappingVolume[]> {
@@ -79,6 +79,6 @@ export class WrapVolumeQuery {
   private readonly _dbClient: Knex;
   private readonly _logger: Logger;
   private readonly _benderIntervals: BenderTime;
-  private _wrapUsdVolumeRepository: WrapUsdVolumeRepository;
-  private _rollingWrapUsdVolumeRepository: RollingWrapUsdVolumeRepository;
+  private _wrapUsdVolumeRepository: ProjectionWrapVolumeRepository;
+  private _rollingWrapUsdVolumeRepository: ProjectionRollingWrapVolumeRepository;
 }

@@ -2,29 +2,23 @@ import {Knex} from "knex";
 import {Logger} from "tslog";
 import {BenderTime} from "../../domain/BenderTime";
 import tokenList from "../../domain/TokenList";
-import {TvlRepository} from "../../repositories/TvlRepository";
+import {ProjectionTotalValueLockedRepository} from "../../repositories/ProjectionTotalValueLockedRepository";
 import BigNumber from "bignumber.js";
-import {NotionalUsdRepository} from "../../repositories/NotionalUsdRepository";
-
-interface TvlVolume {
-  asset: string;
-  usd: string;
-}
+import {ProjectionTotalValueLockedDto} from "../dto/ProjectionTotalValueLockedDto";
 
 interface IntervalTvlVolume {
   time: number;
   totalUsd: string;
-  data: TvlVolume[];
+  data: ProjectionTotalValueLockedDto[];
 }
 
-export class TvlQuery {
+export class TotalValueLockedQuery {
 
   constructor(dbClient: Knex, logger: Logger) {
     this._dbClient = dbClient;
     this._logger = logger;
     this._benderTime = new BenderTime();
-    this._tvlRepository = new TvlRepository(dbClient);
-    this._notionalRepository = new NotionalUsdRepository(dbClient);
+    this._tvlRepository = new ProjectionTotalValueLockedRepository(dbClient);
   }
 
   async tvlVolume(interval: string): Promise<IntervalTvlVolume[]> {
@@ -46,20 +40,18 @@ export class TvlQuery {
     };
     let totalUsdVolume = new BigNumber(0);
 
-    const tvls = await this._tvlRepository.findAll(timestamp);
-    const notionals = await this._notionalRepository.findAll(timestamp);
+    const totalValueLockeds = await this._tvlRepository.findAll(timestamp);
 
     for (const token of tokenList) {
-      const tvl = tvls.find(t => t.asset === token.ethereumSymbol);
-      const notionalValue = notionals.find(t => t.asset === token.ethereumSymbol);
-      const tokenUsdVolume = notionalValue && tvl ? new BigNumber(notionalValue.value).multipliedBy(tvl.value) : new BigNumber(0);
+      const totalValueLocked = totalValueLockeds.find(t => t.asset === token.ethereumSymbol);
 
       tvlIntervalVolume.data.push({
-        asset: token.ethereumSymbol,
-        usd: tokenUsdVolume.toString(10)
+        asset: totalValueLocked.asset,
+        usd: totalValueLocked.usd_value,
+        amount: totalValueLocked.amount
       });
 
-      totalUsdVolume = totalUsdVolume.plus(tokenUsdVolume);
+      totalUsdVolume = totalUsdVolume.plus(totalValueLocked.usd_value);
     }
 
     tvlIntervalVolume.totalUsd = totalUsdVolume.toString(10);
@@ -70,6 +62,5 @@ export class TvlQuery {
   private readonly _dbClient: Knex;
   private readonly _logger: Logger;
   private readonly _benderTime: BenderTime;
-  private _tvlRepository: TvlRepository;
-  private _notionalRepository: NotionalUsdRepository;
+  private _tvlRepository: ProjectionTotalValueLockedRepository;
 }
