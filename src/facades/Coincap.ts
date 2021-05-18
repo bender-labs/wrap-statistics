@@ -11,17 +11,20 @@ export class Coincap {
 
     if (benderToken && benderToken.coincapAssetId !== "") {
       usdPrice = await this.getUsdPrice(timestamp, benderToken.coincapAssetId, logger);
-      logger.debug("notional value for token " + benderToken.ethereumSymbol + " at timestamp " + timestamp + " = " + usdPrice);
+      logger.debug("coincap : notional value for token " + benderToken.ethereumSymbol + " at timestamp " + timestamp + " = " + usdPrice);
     }
 
     return usdPrice;
   }
 
   async getUsdPrice(timestamp: number, assetId: string, logger: Logger): Promise<number> {
+    //It seems that the endpoint queries on a hidden build timestamp. Start and end may not works as you think
     try {
       const twoMinutesEarlier = timestamp - 120000;
+      const twoMinutesAfter = timestamp + 120000;
 
-      const response = await request.get("https://api.coincap.io/v2/assets/" + assetId + "/history?interval=m1&start=" + twoMinutesEarlier + "&end=" + timestamp);
+      const response = await request.get("https://api.coincap.io/v2/assets/" + assetId + "/history?interval=h1&start=" + twoMinutesEarlier + "&end=" + twoMinutesAfter);
+
       if (response && response.status === 200) {
         const prices = response.body;
         if (prices && prices["data"] && prices["data"].length > 0) {

@@ -19,7 +19,7 @@ export class BenderTime {
     }
   }
 
-  _daysFromLaunch(): number {
+  private _daysFromLaunch(): number {
     return DateTime.utc().diff(DateTime.fromMillis(BenderTime.startMs), 'day').days;
   }
 
@@ -49,6 +49,14 @@ export class BenderTime {
     }
 
     return intervals;
+  }
+
+  static getLastClosingHourTimestamp(timestamp: number): number {
+    return DateTime.fromMillis(timestamp, {zone: "utc"}).startOf("hour").toMillis();
+  }
+
+  static getPreviousIsoDay(timestamp: number): string {
+    return DateTime.fromMillis(timestamp).minus({"days": 1}).startOf("day").toISO({includeOffset: false});
   }
 
   public static startMs = 1619445600000;

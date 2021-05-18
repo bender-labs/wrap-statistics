@@ -6,6 +6,7 @@ const tokenList: Token[] = [{
   tezosSymbol: "wAAVE",
   decimals: 18,
   coincapAssetId: "aave",
+  coinmetricsAssetId: "aave",
   type: "ERC20",
   allocation: 1
 }, {
@@ -14,6 +15,7 @@ const tokenList: Token[] = [{
   tezosSymbol: "wBUSD",
   decimals: 18,
   coincapAssetId: "binance-usd",
+  coinmetricsAssetId: "busd",
   type: "ERC20",
   allocation: 1
 }, {
@@ -22,6 +24,7 @@ const tokenList: Token[] = [{
   tezosSymbol: "wCEL",
   decimals: 4,
   coincapAssetId: "celsius",
+  coinmetricsAssetId: "",
   type: "ERC20",
   allocation: 1
 }, {
@@ -30,6 +33,7 @@ const tokenList: Token[] = [{
   tezosSymbol: "wCOMP",
   decimals: 18,
   coincapAssetId: "compound",
+  coinmetricsAssetId: "comp",
   type: "ERC20",
   allocation: 1
 }, {
@@ -38,6 +42,7 @@ const tokenList: Token[] = [{
   tezosSymbol: "wCRO",
   decimals: 8,
   coincapAssetId: "crypto-com-coin",
+  coinmetricsAssetId: "cro",
   type: "ERC20",
   allocation: 1
 }, {
@@ -46,6 +51,7 @@ const tokenList: Token[] = [{
   tezosSymbol: "wDAI",
   decimals: 18,
   coincapAssetId: "multi-collateral-dai",
+  coinmetricsAssetId: "dai",
   type: "ERC20",
   allocation: 1
 }, {
@@ -54,6 +60,7 @@ const tokenList: Token[] = [{
   tezosSymbol: "wFTT",
   decimals: 18,
   coincapAssetId: "ftx-token",
+  coinmetricsAssetId: "ftt",
   type: "ERC20",
   allocation: 1
 }, {
@@ -62,6 +69,7 @@ const tokenList: Token[] = [{
   tezosSymbol: "wHT",
   decimals: 18,
   coincapAssetId: "huobi-token",
+  coinmetricsAssetId: "ht",
   type: "ERC20",
   allocation: 1
 }, {
@@ -70,6 +78,7 @@ const tokenList: Token[] = [{
   tezosSymbol: "wHUSD",
   decimals: 8,
   coincapAssetId: "husd",
+  coinmetricsAssetId: "husd",
   type: "ERC20",
   allocation: 1
 }, {
@@ -78,6 +87,7 @@ const tokenList: Token[] = [{
   tezosSymbol: "wLEO",
   decimals: 18,
   coincapAssetId: "unus-sed-leo",
+  coinmetricsAssetId: "leo_eth",
   type: "ERC20",
   allocation: 1
 }, {
@@ -86,6 +96,7 @@ const tokenList: Token[] = [{
   tezosSymbol: "wMATIC",
   decimals: 18,
   coincapAssetId: "matic-network",
+  coinmetricsAssetId: "",
   type: "ERC20",
   allocation: 1
 }, {
@@ -94,6 +105,7 @@ const tokenList: Token[] = [{
   tezosSymbol: "wMKR",
   decimals: 18,
   coincapAssetId: "maker",
+  coinmetricsAssetId: "mkr",
   type: "ERC20",
   allocation: 1
 }, {
@@ -102,6 +114,7 @@ const tokenList: Token[] = [{
   tezosSymbol: "wOKB",
   decimals: 18,
   coincapAssetId: "okb",
+  coinmetricsAssetId: "",
   type: "ERC20",
   allocation: 1
 }, {
@@ -110,6 +123,7 @@ const tokenList: Token[] = [{
   tezosSymbol: "wPAX",
   decimals: 18,
   coincapAssetId: "paxos-standard-token",
+  coinmetricsAssetId: "pax",
   type: "ERC20",
   allocation: 1
 }, {
@@ -118,6 +132,7 @@ const tokenList: Token[] = [{
   tezosSymbol: "wSUSHI",
   decimals: 18,
   coincapAssetId: "sushiswap",
+  coinmetricsAssetId: "sushi",
   type: "ERC20",
   allocation: 1
 }, {
@@ -126,6 +141,7 @@ const tokenList: Token[] = [{
   tezosSymbol: "wUNI",
   decimals: 18,
   coincapAssetId: "uniswap",
+  coinmetricsAssetId: "uni",
   type: "ERC20",
   allocation: 2
 }, {
@@ -134,6 +150,7 @@ const tokenList: Token[] = [{
   tezosSymbol: "wUSDC",
   decimals: 6,
   coincapAssetId: "usd-coin",
+  coinmetricsAssetId: "usdc",
   type: "ERC20",
   allocation: 2
 }, {
@@ -142,6 +159,7 @@ const tokenList: Token[] = [{
   tezosSymbol: "wUSDT",
   decimals: 6,
   coincapAssetId: "tether",
+  coinmetricsAssetId: "usdt",
   type: "ERC20",
   allocation: 2
 }, {
@@ -150,6 +168,7 @@ const tokenList: Token[] = [{
   tezosSymbol: "wWBTC",
   decimals: 8,
   coincapAssetId: "wrapped-bitcoin",
+  coinmetricsAssetId: "wbtc",
   type: "ERC20",
   allocation: 2
 }, {
@@ -158,6 +177,7 @@ const tokenList: Token[] = [{
   tezosSymbol: "wWETH",
   decimals: 18,
   coincapAssetId: "ethereum",
+  coinmetricsAssetId: "weth",
   type: "ERC20",
   allocation: 2
 }, {
@@ -166,6 +186,7 @@ const tokenList: Token[] = [{
   tezosSymbol: "wLINK",
   decimals: 18,
   coincapAssetId: "chainlink",
+  coinmetricsAssetId: "link",
   type: "ERC20",
   allocation: 2
 }, {
@@ -174,6 +195,7 @@ const tokenList: Token[] = [{
   tezosSymbol: "WRAP",
   decimals: 8,
   coincapAssetId: "",
+  coinmetricsAssetId: "",
   type: "ERC20",
   allocation: 0
 }];

@@ -7,6 +7,7 @@ import {Knex} from "knex";
 import {AppStateRepository} from "../../repositories/AppStateRepository";
 import tokenList from "../../domain/TokenList";
 import {NotionalUsdRepository} from "../../repositories/NotionalUsdRepository";
+import {Coinmetrics} from "../../facades/Coinmetrics";
 
 export class NotionalUsdIndexer {
 
@@ -16,6 +17,7 @@ export class NotionalUsdIndexer {
     this._appState = new AppStateRepository(dependencies.dbClient);
     this._notionalUsdRepository = new NotionalUsdRepository(dependencies.dbClient);
     this._dbClient = dependencies.dbClient;
+    this._coinMetrics = new Coinmetrics();
   }
 
   async index(): Promise<void> {
@@ -29,16 +31,9 @@ export class NotionalUsdIndexer {
       try {
         this._logger.debug("Notional values for " + DateTime.fromMillis(currentIndexingTimeMs).toString());
         transaction = await this._dbClient.transaction();
-
-        for (const token of tokenList) {
-          const usdPrice = await this._coincap.getUsdPriceForToken(token.token, currentIndexingTimeMs, this._logger);
-          await this._notionalUsdRepository.save({
-            value: usdPrice ? usdPrice.toString() : (token.ethereumSymbol === "HUSD" ? "1" : "0"),
-            asset: token.ethereumSymbol,
-            timestamp: currentIndexingTimeMs
-          }, transaction);
-        }
-
+        const lastHourClosing = BenderTime.getLastClosingHourTimestamp(currentIndexingTimeMs);
+        await this._notionalPriceForTokens(lastHourClosing, transaction);
+        await this._notionalPriceForXtz(lastHourClosing, transaction);
         await this._setLastNotionalIndexingTimestamp(currentIndexingTimeMs, transaction);
         currentIndexingTimeMs = DateTime.fromMillis(currentIndexingTimeMs).plus({"hours": 1}).toMillis();
         await transaction.commit();
@@ -49,6 +44,32 @@ export class NotionalUsdIndexer {
         }
       }
     }
+  }
+
+  async _notionalPriceForTokens(currentIndexingTimeMs: number, transaction: Knex.Transaction): Promise<void> {
+    for (const token of tokenList) {
+      let usdPrice = await this._coincap.getUsdPriceForToken(token.token, currentIndexingTimeMs, this._logger);
+      if (usdPrice === 0) {
+        usdPrice = await this._coinMetrics.getUsdPriceForToken(currentIndexingTimeMs, token.token, this._logger);
+      }
+      await this._notionalUsdRepository.save({
+        value: usdPrice ? usdPrice.toString() : (token.ethereumSymbol === "HUSD" ? "1" : "0"),
+        asset: token.ethereumSymbol,
+        timestamp: currentIndexingTimeMs
+      }, transaction);
+    }
+  }
+
+  async _notionalPriceForXtz(currentIndexingTimeMs: number, transaction: Knex.Transaction) {
+    let usdPrice = await this._coincap.getUsdPrice(currentIndexingTimeMs, "tezos", this._logger);
+    if (usdPrice === 0) {
+      usdPrice = await this._coinMetrics.getUsdPrice(currentIndexingTimeMs, "xtz", this._logger);
+    }
+    await this._notionalUsdRepository.save({
+      value: usdPrice.toString(),
+      asset: "XTZ",
+      timestamp: currentIndexingTimeMs
+    }, transaction);
   }
 
   async _setLastNotionalIndexingTimestamp(lastNotionalIndexingTimestamp: number, transaction: Knex.Transaction): Promise<void> {
@@ -64,4 +85,5 @@ export class NotionalUsdIndexer {
   private _appState: AppStateRepository;
   private _notionalUsdRepository: NotionalUsdRepository;
   private _dbClient: Knex;
+  private _coinMetrics: Coinmetrics;
 }

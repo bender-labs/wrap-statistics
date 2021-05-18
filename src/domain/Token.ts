@@ -6,6 +6,7 @@ export interface Token {
   tezosSymbol: string;
   decimals: number;
   coincapAssetId: string;
+  coinmetricsAssetId: string;
   type: ERCType;
   allocation: number;
 }
