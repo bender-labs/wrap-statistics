@@ -6,6 +6,12 @@ export type LockAggregatedResult = {
   value: string;
 }
 
+export type LockAggregatedResultWithAddress = {
+  ethereumSymbol: string;
+  tezosAddress: string;
+  value: string;
+}
+
 export class EthereumLockRepository {
 
   constructor(dbClient: Knex) {
@@ -36,6 +42,19 @@ export class EthereumLockRepository {
       .groupBy('ethereumSymbol');
     return result.map(r => ({
       ethereumSymbol: r.ethereumSymbol,
+      value: r.sum ? r.sum : "0"
+    }));
+  }
+
+  async sumAllByAddressAndToken(currentTimestamp: number): Promise<LockAggregatedResultWithAddress[]> {
+    const result = await this._dbClient('locks')
+      .select(["ethereumSymbol", "tezosTo"])
+      .where("ethereumTimestamp", "<=", currentTimestamp)
+      .sum("amount")
+      .groupBy(["ethereumSymbol", "tezosTo"]);
+    return result.map(r => ({
+      ethereumSymbol: r.ethereumSymbol,
+      tezosAddress: r.tezosTo,
       value: r.sum ? r.sum : "0"
     }));
   }

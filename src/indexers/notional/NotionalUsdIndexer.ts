@@ -60,7 +60,7 @@ export class NotionalUsdIndexer {
     }
   }
 
-  async _notionalPriceForXtz(currentIndexingTimeMs: number, transaction: Knex.Transaction) {
+  async _notionalPriceForXtz(currentIndexingTimeMs: number, transaction: Knex.Transaction): Promise<void> {
     let usdPrice = await this._coincap.getUsdPrice(currentIndexingTimeMs, "tezos", this._logger);
     if (usdPrice === 0) {
       usdPrice = await this._coinMetrics.getUsdPrice(currentIndexingTimeMs, "xtz", this._logger);
@@ -72,8 +72,8 @@ export class NotionalUsdIndexer {
     }, transaction);
   }
 
-  async _setLastNotionalIndexingTimestamp(lastNotionalIndexingTimestamp: number, transaction: Knex.Transaction): Promise<void> {
-    await this._appState.setLastNotionalIndexingTimestamp(lastNotionalIndexingTimestamp, transaction);
+  async _setLastNotionalIndexingTimestamp(lastTimestamp: number, transaction: Knex.Transaction): Promise<void> {
+    await this._appState.setLastNotionalIndexingTimestamp(lastTimestamp, transaction);
   }
 
   async _getLastNotionalIndexingTimestamp(): Promise<number> {

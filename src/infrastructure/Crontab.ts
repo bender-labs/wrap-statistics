@@ -7,7 +7,7 @@ export class Crontab {
     this._logger = dependencies.logger;
   }
 
-  register(job: () => Promise<void>, pattern: string, runOnInit: boolean = false): void {
+  register(job: () => Promise<void>, pattern: string, runOnInit = false): void {
     let taskRunning = false;
     this._jobs.push(
       new CronJob({

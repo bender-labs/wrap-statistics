@@ -9,6 +9,7 @@ import {TotalValueLockedBuilder} from "./projections/TotalValueLockedBuilder";
 import {NotionalUsdIndexer} from "./indexers/notional/NotionalUsdIndexer";
 import {WrapXtzPriceIndexer} from "./indexers/wrap/WrapXtzPriceIndexer";
 import {WrapUsdVolumeBuilder} from "./projections/WrapUsdVolumeBuilder";
+import {RewardsBuilder} from "./projections/RewardsBuilder";
 
 const everyMinute = "* * * * *";
 const every5Minutes = "*/5 * * * *";
@@ -26,5 +27,6 @@ export function scheduleJobs(dependencies: StatisticsDependencies): Crontab {
   crontab.register(() => new WrapXtzPriceIndexer(dependencies).index(), everyMinute);
   crontab.register(() => new TotalValueLockedBuilder(dependencies).build(), every5Minutes);
   crontab.register(() => new WrapUsdVolumeBuilder(dependencies).build(), every5Minutes);
+  crontab.register(() => new RewardsBuilder(dependencies).build(), every5Minutes, true);
   return crontab;
 }

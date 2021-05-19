@@ -6,7 +6,7 @@ import BigNumber from "bignumber.js";
 import {NotionalUsdRepository} from "../../repositories/NotionalUsdRepository";
 import {EthereumLockRepository} from "../../repositories/EthereumLockRepository";
 import {EthereumUnlockRepository} from "../../repositories/EthereumUnlockRepository";
-import {globalRewardsUserAllocation, rewards, totalTokenAllocation} from "../../domain/Rewards";
+import {getTokenRewardForPeriod} from "../../domain/Rewards";
 import {WrapXtzPriceRepository} from "../../repositories/WrapXtzPriceRepository";
 
 interface TokenGlobalStats {
@@ -45,17 +45,6 @@ export class GlobalStatsQuery {
     this._wrapPriceRepository = new WrapXtzPriceRepository(dbClient);
   }
 
-  private _getRewardForPeriod(start: number, end: number): number {
-    let result = 0;
-    Object.keys(rewards).forEach(key => {
-      const rewardStart = parseInt(key);
-      if (rewardStart < end && rewardStart >= start) {
-        result += rewards[key];
-      }
-    });
-    return result;
-  }
-
   async statsFor(start: number, end: number): Promise<GlobalStats> {
     const result: GlobalStats = {
       tokens: [],
@@ -85,7 +74,7 @@ export class GlobalStatsQuery {
         const generatedFees = lockAmountOnInterval.multipliedBy(0.0015).plus(unlockAmountOnInterval.multipliedBy(0.0015));
         const generatedFeesInUsd = endOfIntervalNotionalValue ? new BigNumber(endOfIntervalNotionalValue.value).multipliedBy(generatedFees) : new BigNumber(0);
 
-        const wrapReward = Math.round(this._getRewardForPeriod(start, end) * globalRewardsUserAllocation * (token.allocation / totalTokenAllocation));
+        const wrapReward = getTokenRewardForPeriod(start, end, token);
         const endOfIntervalWrapTezosRatio = await this._wrapPriceRepository.find(end);
         const endOfIntervalTezosUsdPrice = await this._notionalRepository.find("XTZ", end);
         const endOfIntervalWrapUsdPrice = new BigNumber(endOfIntervalWrapTezosRatio.value).multipliedBy(endOfIntervalTezosUsdPrice.value);

@@ -127,8 +127,8 @@ export class WrapUsdVolumeBuilder {
     return endOfIntervalTokenNotionalValue ? new BigNumber(endOfIntervalTokenNotionalValue.value).multipliedBy(tokenUsdWrapVolume) : new BigNumber(0);
   }
 
-  private async _setLastWrappingUsdVolumeBuildTimestamp(lastNotionalIndexingTimestamp: number, transaction: Knex.Transaction): Promise<void> {
-    await this._appStateRepository.setLastWrappingUsdVolumeBuildTimestamp(lastNotionalIndexingTimestamp, transaction);
+  private async _setLastWrappingUsdVolumeBuildTimestamp(lastTimestamp: number, transaction: Knex.Transaction): Promise<void> {
+    await this._appStateRepository.setLastWrappingUsdVolumeBuildTimestamp(lastTimestamp, transaction);
   }
 
   private async _getLastWrappingUsdVolumeBuildTimestamp(): Promise<number> {

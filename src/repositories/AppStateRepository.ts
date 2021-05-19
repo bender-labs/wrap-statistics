@@ -10,6 +10,21 @@ export class AppStateRepository {
     this._dbClient = dbClient;
   }
 
+  async getLastRewardsBuildTimestamp(): Promise<number> {
+    const item = await this._getValue('last_rewards_build_timestamp');
+    return item ? +item.value : null;
+  }
+
+  async setLastRewardsBuildTimestamp(
+    timestamp: number,
+    transaction: Knex.Transaction
+  ): Promise<void> {
+    await this._setValue(
+      {key: 'last_rewards_build_timestamp', value: timestamp.toString()},
+      transaction
+    );
+  }
+
   async getLastWrappingUsdVolumeBuildTimestamp(): Promise<number> {
     const item = await this._getValue('last_wrapping_usd_volume_build_timestamp');
     return item ? +item.value : null;
