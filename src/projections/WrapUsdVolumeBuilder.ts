@@ -3,7 +3,7 @@ import {Knex} from "knex";
 import {AppStateRepository} from "../repositories/AppStateRepository";
 import {StatisticsDependencies} from "../indexers/StatisticsDependencies";
 import {BenderTime} from "../domain/BenderTime";
-import {DateTime} from "luxon";
+import {DateTime, Interval} from "luxon";
 import {ProjectionWrapVolumeRepository} from "../repositories/ProjectionWrapVolumeRepository";
 import {ProjectionRollingWrapVolumeRepository} from "../repositories/ProjectionRollingWrapVolumeRepository";
 import {EthereumLockRepository, LockAggregatedResult} from "../repositories/EthereumLockRepository";
@@ -30,13 +30,10 @@ export class WrapUsdVolumeBuilder {
     this._logger.debug("building wrap usd volumes");
     const nowMs = DateTime.utc().toMillis();
 
-    const lastWrapTimestamp = await this._getLastWrapIndexedTimestamp() ?? 0;
-    const lastUnwrapTimestamp = await this._getLastUnwrapIndexedTimestamp() ?? 0;
-    const lastNotionalTimestamp = await this._getLastNotionalIndexingTimestamp() ?? 0;
-
+    const globalIndexingTimestamp = await this._appStateRepository.getGlobalIndexingTimestamp();
     let currentIndexingTimeMs = await this._getLastWrappingUsdVolumeBuildTimestamp();
 
-    while (currentIndexingTimeMs < nowMs && currentIndexingTimeMs < (lastWrapTimestamp * 1000) && currentIndexingTimeMs < (lastUnwrapTimestamp * 1000) && currentIndexingTimeMs < lastNotionalTimestamp) {
+    while (currentIndexingTimeMs < nowMs && currentIndexingTimeMs < globalIndexingTimestamp) {
       let transaction;
       try {
         transaction = await this._dbClient.transaction();
@@ -56,18 +53,6 @@ export class WrapUsdVolumeBuilder {
     }
   }
 
-  private async _getLastNotionalIndexingTimestamp(): Promise<number> {
-    return await this._appStateRepository.getLastNotionalIndexingTimestamp();
-  }
-
-  private async _getLastWrapIndexedTimestamp(): Promise<number> {
-    return await this._appStateRepository.getEthereumWrapLastIndexedBlockTimestamp();
-  }
-
-  private async _getLastUnwrapIndexedTimestamp(): Promise<number> {
-    return await this._appStateRepository.getEthereumUnwrapLastIndexedBlockTimestamp();
-  }
-
   private async _buildRollingVolume(currentIndexingTimeMs: number, transaction: Knex.Transaction): Promise<void> {
     const startTime = DateTime.fromMillis(currentIndexingTimeMs, {zone: "utc"}).minus({"days": 1});
     const startWrappingVolumeForAllTokens = await this._ethereumLockRepository.sumAll(startTime.toMillis());
@@ -76,25 +61,61 @@ export class WrapUsdVolumeBuilder {
 
     for (const token of tokenList) {
       const tokenWrapVolume = this._getTokenWrapVolume(token, startWrappingVolumeForAllTokens, endWrappingVolumeForAllTokens);
-      const tokenUsdWrapVolume = this._getTokenUsdWrapVolume(token, tokenWrapVolume, endOfIntervalNotionalValues);
+      const tokenWrapVolumeUsdValue = this._getTokenWrapVolumeUsdValue(token, tokenWrapVolume, endOfIntervalNotionalValues);
 
       await this._rollingWrapUsdVolumeRepository.save({
         name: "24h",
         asset: token.ethereumSymbol,
         amount: tokenWrapVolume.toString(10),
-        usd_value: tokenUsdWrapVolume.toString(10)
+        usd_value: tokenWrapVolumeUsdValue.toString(10)
       }, transaction);
     }
   }
 
   private async _buildDayWrapUsdVolumeFor(currentIndexingTimeMs: number, transaction: Knex.Transaction): Promise<void> {
-    const currentDayInterval = this._benderTime.getBenderDayFor(currentIndexingTimeMs);
-    await this._buildWrapUsdVolumeForInterval(currentDayInterval.start.toMillis(), currentDayInterval.end.toMillis(), transaction);
+    const lastIndexedDay = await this._getLastIndexedDay();
+    const currentDayToIndex = this._benderTime.getBenderDayFor(currentIndexingTimeMs);
+
+    if (lastIndexedDay && !lastIndexedDay.start.equals(currentDayToIndex.start)) {
+      await this._buildWrapUsdVolumeForInterval(lastIndexedDay.start.toMillis(), currentDayToIndex.end.toMillis(), transaction);
+    }
+
+    await this._buildWrapUsdVolumeForInterval(currentDayToIndex.start.toMillis(), currentDayToIndex.end.toMillis(), transaction);
+    await this._setLastIndexedDay(currentDayToIndex, transaction);
+  }
+
+  private async _getLastIndexedDay(): Promise<Interval> {
+    const lastDayStartTimestamp = await this._appStateRepository.getValue("wrap_usd_volume_last_day_start");
+    const lastDayEndTimestamp = await this._appStateRepository.getValue("wrap_usd_volume_last_day_end");
+    return lastDayStartTimestamp && lastDayEndTimestamp ? Interval.fromDateTimes(DateTime.fromMillis(lastDayStartTimestamp), DateTime.fromMillis(lastDayEndTimestamp)) : null;
+  }
+
+  private async _setLastIndexedDay(indexedDay: Interval, transaction: Knex.Transaction): Promise<void> {
+    await this._appStateRepository.setValue("wrap_usd_volume_last_day_start", indexedDay.start.toMillis(), transaction);
+    await this._appStateRepository.setValue("wrap_usd_volume_last_day_end", indexedDay.end.toMillis(), transaction);
   }
 
   private async _buildWeekWrapUsdVolumeFor(currentIndexingTimeMs: number, transaction: Knex.Transaction): Promise<void> {
-    const currentWeekInterval = this._benderTime.getBenderWeekFor(currentIndexingTimeMs);
-    await this._buildWrapUsdVolumeForInterval(currentWeekInterval.start.toMillis(), currentWeekInterval.end.toMillis(), transaction);
+    const lastIndexedWeek = await this._getLastIndexedWeek();
+    const currentWeekToIndex = this._benderTime.getBenderWeekFor(currentIndexingTimeMs);
+
+    if (lastIndexedWeek && !lastIndexedWeek.start.equals(currentWeekToIndex.start)) {
+      await this._buildWrapUsdVolumeForInterval(lastIndexedWeek.start.toMillis(), lastIndexedWeek.end.toMillis(), transaction);
+    }
+
+    await this._buildWrapUsdVolumeForInterval(currentWeekToIndex.start.toMillis(), currentWeekToIndex.end.toMillis(), transaction);
+    await this._setLastIndexedWeek(currentWeekToIndex, transaction);
+  }
+
+  private async _getLastIndexedWeek(): Promise<Interval> {
+    const lastWeekStartTimestamp = await this._appStateRepository.getValue("wrap_usd_volume_last_week_start");
+    const lastWeekEndTimestamp = await this._appStateRepository.getValue("wrap_usd_volume_last_week_end");
+    return lastWeekStartTimestamp && lastWeekEndTimestamp ? Interval.fromDateTimes(DateTime.fromMillis(lastWeekStartTimestamp), DateTime.fromMillis(lastWeekEndTimestamp)) : null;
+  }
+
+  private async _setLastIndexedWeek(indexedWeek: Interval, transaction: Knex.Transaction): Promise<void> {
+    await this._appStateRepository.setValue("wrap_usd_volume_last_week_start", indexedWeek.start.toMillis(), transaction);
+    await this._appStateRepository.setValue("wrap_usd_volume_last_week_end", indexedWeek.end.toMillis(), transaction);
   }
 
   private async _buildWrapUsdVolumeForInterval(start: number, end: number, transaction: Knex.Transaction): Promise<void> {
@@ -104,7 +125,7 @@ export class WrapUsdVolumeBuilder {
 
     for (const token of tokenList) {
       const tokenWrapVolume = this._getTokenWrapVolume(token, startWrappingVolumeForAllTokens, endWrappingVolumeForAllTokens);
-      const tokenUsdWrapVolume = this._getTokenUsdWrapVolume(token, tokenWrapVolume, endOfIntervalNotionalValues);
+      const tokenUsdWrapVolume = this._getTokenWrapVolumeUsdValue(token, tokenWrapVolume, endOfIntervalNotionalValues);
 
       await this._wrapUsdVolumeRepository.save({
         start: start,
@@ -122,7 +143,7 @@ export class WrapUsdVolumeBuilder {
     return new BigNumber(endTokenWrappingVolume).minus(startTokenWrappingVolume);
   }
 
-  private _getTokenUsdWrapVolume(token: Token, tokenUsdWrapVolume: BigNumber, endOfIntervalNotionalValues: NotionalUsd[]): BigNumber {
+  private _getTokenWrapVolumeUsdValue(token: Token, tokenUsdWrapVolume: BigNumber, endOfIntervalNotionalValues: NotionalUsd[]): BigNumber {
     const endOfIntervalTokenNotionalValue = endOfIntervalNotionalValues.find(v => v.asset === token.ethereumSymbol);
     return endOfIntervalTokenNotionalValue ? new BigNumber(endOfIntervalTokenNotionalValue.value).multipliedBy(tokenUsdWrapVolume) : new BigNumber(0);
   }

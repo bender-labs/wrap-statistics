@@ -10,6 +10,25 @@ export class AppStateRepository {
     this._dbClient = dbClient;
   }
 
+  async getGlobalIndexingTimestamp(): Promise<number> {
+    const ethereumWrapLastIndexedBlockTimestamp = await this.getEthereumWrapLastIndexedBlockTimestamp() ?? 0;
+    const ethereumUnwrapLastIndexedBlockTimestamp = await this.getEthereumUnwrapLastIndexedBlockTimestamp() ?? 0;
+    const lastNotionalIndexingTimestamp = await this.getLastNotionalIndexingTimestamp() ?? 0;
+    return Math.min((ethereumWrapLastIndexedBlockTimestamp * 1000), (ethereumUnwrapLastIndexedBlockTimestamp * 1000), lastNotionalIndexingTimestamp);
+  }
+
+  async getValue(key: string): Promise<number> {
+    const item = await this._getValue(key);
+    return item ? +item.value : null;
+  }
+
+  async setValue(key: string, timestamp: number, transaction: Knex.Transaction): Promise<void> {
+    await this._setValue(
+      {key: key, value: timestamp.toString()},
+      transaction
+    );
+  }
+
   async getLastRewardsBuildTimestamp(): Promise<number> {
     const item = await this._getValue('last_rewards_build_timestamp');
     return item ? +item.value : null;

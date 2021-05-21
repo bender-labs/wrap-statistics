@@ -26,20 +26,18 @@ export class RewardsBuilder {
     this._logger.debug("building rewards");
     const nowMs = DateTime.utc().toMillis();
 
-    const lastWrapTimestamp = await this._getLastWrapIndexedTimestamp() ?? 0;
-    const lastUnwrapTimestamp = await this._getLastUnwrapIndexedTimestamp() ?? 0;
+    const globalIndexingTimestamp = await this._appStateRepository.getGlobalIndexingTimestamp();
+    let nextRewardsIndexingTimestamp = DateTime.fromMillis(await this._getLastRewardsBuildTimestamp()).plus({"hours": 1}).toMillis();
 
-    let currentIndexingTimeMs = await this._getLastRewardsBuildTimestamp();
-
-    while (currentIndexingTimeMs < nowMs && currentIndexingTimeMs < (lastWrapTimestamp * 1000) && currentIndexingTimeMs < (lastUnwrapTimestamp * 1000)) {
+    while (nextRewardsIndexingTimestamp < nowMs && nextRewardsIndexingTimestamp < globalIndexingTimestamp) {
       let transaction;
       try {
         transaction = await this._dbClient.transaction();
-        this._logger.debug("building rewards @ " + currentIndexingTimeMs);
-        await this._buildWeekRewardsFor(currentIndexingTimeMs, transaction);
-        await this._setLastRewardsBuildTimestamp(currentIndexingTimeMs, transaction);
+        this._logger.debug("building rewards @ " + nextRewardsIndexingTimestamp);
+        await this._buildWeekRewardsFor(nextRewardsIndexingTimestamp, transaction);
+        await this._setLastRewardsBuildTimestamp(nextRewardsIndexingTimestamp, transaction);
         await transaction.commit();
-        currentIndexingTimeMs = DateTime.fromMillis(currentIndexingTimeMs).plus({"hours": 1}).toMillis();
+        nextRewardsIndexingTimestamp = DateTime.fromMillis(nextRewardsIndexingTimestamp).plus({"hours": 1}).toMillis();
       } catch (e) {
         this._logger.error(`Error building rewards : ${e.message}`);
         if (transaction) {
@@ -47,14 +45,6 @@ export class RewardsBuilder {
         }
       }
     }
-  }
-
-  private async _getLastWrapIndexedTimestamp(): Promise<number> {
-    return await this._appStateRepository.getEthereumWrapLastIndexedBlockTimestamp();
-  }
-
-  private async _getLastUnwrapIndexedTimestamp(): Promise<number> {
-    return await this._appStateRepository.getEthereumUnwrapLastIndexedBlockTimestamp();
   }
 
   private async _setLastRewardsBuildTimestamp(lastTimestamp: number, transaction: Knex.Transaction): Promise<void> {
@@ -66,7 +56,29 @@ export class RewardsBuilder {
   }
 
   private async _buildWeekRewardsFor(currentIndexingTimeMs: number, transaction: Knex.Transaction): Promise<void> {
-    const currentWeekInterval = this._benderTime.getBenderWeekFor(currentIndexingTimeMs);
+    const lastIndexedWeek = await this._getLastIndexedWeek();
+    const currentWeekToIndex = this._benderTime.getBenderWeekFor(currentIndexingTimeMs);
+
+    if (lastIndexedWeek && !lastIndexedWeek.start.equals(currentWeekToIndex.start)) {
+      await this._buildWeekRewardsForAllTokens(lastIndexedWeek, transaction);
+    }
+
+    await this._buildWeekRewardsForAllTokens(currentWeekToIndex, transaction);
+    await this._setLastIndexedWeek(currentWeekToIndex, transaction);
+  }
+
+  private async _getLastIndexedWeek(): Promise<Interval> {
+    const lastWeekStartTimestamp = await this._appStateRepository.getValue("rewards_last_week_start");
+    const lastWeekEndTimestamp = await this._appStateRepository.getValue("rewards_last_week_end");
+    return lastWeekStartTimestamp && lastWeekEndTimestamp ? Interval.fromDateTimes(DateTime.fromMillis(lastWeekStartTimestamp), DateTime.fromMillis(lastWeekEndTimestamp)) : null;
+  }
+
+  private async _setLastIndexedWeek(indexedWeek: Interval, transaction: Knex.Transaction): Promise<void> {
+    await this._appStateRepository.setValue("rewards_last_week_start", indexedWeek.start.toMillis(), transaction);
+    await this._appStateRepository.setValue("rewards_last_week_end", indexedWeek.end.toMillis(), transaction);
+  }
+
+  private async _buildWeekRewardsForAllTokens(currentWeekInterval: Interval, transaction: Knex.Transaction): Promise<void> {
     const startWrappingVolumeForAllTokens = await this._ethereumLockRepository.sumAllByAddressAndToken(currentWeekInterval.start.toMillis());
     const endWrappingVolumeForAllTokens = await this._ethereumLockRepository.sumAllByAddressAndToken(currentWeekInterval.end.toMillis());
 

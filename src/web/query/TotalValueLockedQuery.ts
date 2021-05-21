@@ -45,13 +45,15 @@ export class TotalValueLockedQuery {
     for (const token of tokenList) {
       const totalValueLocked = totalValueLockeds.find(t => t.asset === token.ethereumSymbol);
 
-      tvlIntervalVolume.data.push({
-        asset: totalValueLocked.asset,
-        usd: totalValueLocked.usd_value,
-        amount: totalValueLocked.amount
-      });
+      if (totalValueLocked) {
+        tvlIntervalVolume.data.push({
+          asset: totalValueLocked.asset,
+          usd: totalValueLocked.usd_value,
+          amount: totalValueLocked.amount
+        });
 
-      totalUsdVolume = totalUsdVolume.plus(totalValueLocked.usd_value);
+        totalUsdVolume = totalUsdVolume.plus(totalValueLocked.usd_value);
+      }
     }
 
     tvlIntervalVolume.totalUsd = totalUsdVolume.toString(10);

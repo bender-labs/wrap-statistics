@@ -23,18 +23,17 @@ export class TotalValueLockedBuilder {
     this._dbClient = dependencies.dbClient;
     this._tvlRepository = new ProjectionTotalValueLockedRepository(dependencies.dbClient);
     this._notionalRepository = new NotionalUsdRepository(dependencies.dbClient);
+    this._benderTime = new BenderTime();
   }
 
   async build(): Promise<void> {
     this._logger.debug("Building tvl for all assets");
     const nowMs = DateTime.now().toMillis();
-    const lastWrapTimestamp = await this._getLastWrapIndexedTimestamp() ?? 0;
-    const lastUnwrapTimestamp = await this._getLastUnwrapIndexedTimestamp() ?? 0;
-    const lastNotionalTimestamp = await this._getLastNotionalIndexingTimestamp() ?? 0;
 
+    const globalIndexingTimestamp = await this._appStateRepository.getGlobalIndexingTimestamp();
     let currentIndexingTimeMs = DateTime.fromMillis(await this._getLastTvlIndexingTimestamp()).plus({"hours": 1}).toMillis();
 
-    while (currentIndexingTimeMs < nowMs && currentIndexingTimeMs < (lastWrapTimestamp * 1000) && currentIndexingTimeMs < (lastUnwrapTimestamp * 1000) && currentIndexingTimeMs < lastNotionalTimestamp) {
+    while (currentIndexingTimeMs < nowMs && currentIndexingTimeMs < globalIndexingTimestamp) {
       let transaction;
       try {
         this._logger.debug("Tvl values @ " + DateTime.fromMillis(currentIndexingTimeMs).toString());
@@ -69,24 +68,12 @@ export class TotalValueLockedBuilder {
     }
   }
 
-  private async _getLastWrapIndexedTimestamp(): Promise<number> {
-    return await this._appStateRepository.getEthereumWrapLastIndexedBlockTimestamp();
-  }
-
-  private async _getLastUnwrapIndexedTimestamp(): Promise<number> {
-    return await this._appStateRepository.getEthereumUnwrapLastIndexedBlockTimestamp();
-  }
-
   private async _setLastTvlIndexingTimestamp(lastTvlIndexingTimestamp: number, transaction: Knex.Transaction): Promise<void> {
     await this._appStateRepository.setLastTvlIndexingTimestamp(lastTvlIndexingTimestamp, transaction);
   }
 
   private async _getLastTvlIndexingTimestamp(): Promise<number> {
     return await this._appStateRepository.getLastTvlIndexingTimestamp() ?? BenderTime.startMs;
-  }
-
-  private async _getLastNotionalIndexingTimestamp(): Promise<number> {
-    return await this._appStateRepository.getLastNotionalIndexingTimestamp();
   }
 
   private _getTokenTotalLockedVolume(token: Token, locks: LockAggregatedResult[], unlocks: UnlockAggregatedResult[]): BigNumber {
@@ -107,5 +94,6 @@ export class TotalValueLockedBuilder {
   private _dbClient: Knex;
   private _tvlRepository: ProjectionTotalValueLockedRepository;
   private _notionalRepository: NotionalUsdRepository;
+  private _benderTime: BenderTime;
 
 }

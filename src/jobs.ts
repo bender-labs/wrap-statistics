@@ -23,10 +23,10 @@ export function scheduleJobs(dependencies: StatisticsDependencies): Crontab {
   crontab.register(() => new TezosQuorumIndexer(dependencies).index(), everyMinute);
   crontab.register(() => new SignatureIndexer(dependencies).index(), everyMinute);
   crontab.register(() => new EthereumFinalUnwrapIndexer(dependencies).index(), everyMinute);
-  crontab.register(() => new NotionalUsdIndexer(dependencies).index(), everyHourAt3, true);
   crontab.register(() => new WrapXtzPriceIndexer(dependencies).index(), everyMinute);
-  crontab.register(() => new TotalValueLockedBuilder(dependencies).build(), every5Minutes);
-  crontab.register(() => new WrapUsdVolumeBuilder(dependencies).build(), every5Minutes);
+  crontab.register(() => new NotionalUsdIndexer(dependencies).index(), everyHourAt3, true);
+  crontab.register(() => new TotalValueLockedBuilder(dependencies).build(), every5Minutes, true);
+  crontab.register(() => new WrapUsdVolumeBuilder(dependencies).build(), every5Minutes, true);
   crontab.register(() => new RewardsBuilder(dependencies).build(), every5Minutes, true);
   return crontab;
 }
