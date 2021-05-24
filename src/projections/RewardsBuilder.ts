@@ -106,7 +106,7 @@ export class RewardsBuilder {
 
   private async _buildRewardsForAddress(currentWeekInterval: Interval, addressVolume: BigNumber, totalTokenWrapVolumeOnPeriod: BigNumber, token: Token, endWrapsForAddress: LockAggregatedResultWithAddress, transaction: Knex.Transaction) {
     const totalRewardForToken = getTokenRewardForPeriod(currentWeekInterval.start.toMillis(), currentWeekInterval.end.toMillis(), token);
-    const addressReward = new BigNumber(addressVolume).multipliedBy(totalRewardForToken).dividedBy(totalTokenWrapVolumeOnPeriod);
+    const addressReward = new BigNumber(addressVolume).multipliedBy(totalRewardForToken).dividedBy(totalTokenWrapVolumeOnPeriod).dp(8, BigNumber.ROUND_DOWN);
 
     await this._projectionRewardsRepository.save({
       start: currentWeekInterval.start.toMillis(),
