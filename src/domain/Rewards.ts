@@ -25,6 +25,6 @@ export function getTokenRewardForPeriod(start: number, end: number, token: Token
     }
   });
 
-  return Math.round(globalRewardForPeriod * globalRewardsUserAllocation * (token.allocation / totalTokenAllocation));
+  return Math.floor(globalRewardForPeriod * globalRewardsUserAllocation * (token.allocation / totalTokenAllocation));
 }
 
