@@ -58,30 +58,27 @@ export class GlobalStatsQuery {
     const endOfIntervalNotionalValues = await this._notionalRepository.findAll(end);
 
     for (const token of tokenList) {
+      const endOfIntervalNotionalValue = endOfIntervalNotionalValues.find(v => v.asset === token.ethereumSymbol);
+
+      const lockBeginAmountOnInterval = lockBeginSum.find(s => s.ethereumSymbol === token.ethereumSymbol) ? lockBeginSum.find(s => s.ethereumSymbol === token.ethereumSymbol).value : "0";
+      const lockEndAmountOnInterval = lockEndSum.find(s => s.ethereumSymbol === token.ethereumSymbol) ? lockEndSum.find(s => s.ethereumSymbol === token.ethereumSymbol).value : "0";
+      const lockAmountOnInterval = new BigNumber(lockEndAmountOnInterval).minus(lockBeginAmountOnInterval);
+      const wrapUsdVolume = endOfIntervalNotionalValue ? new BigNumber(endOfIntervalNotionalValue.value).multipliedBy(lockAmountOnInterval) : new BigNumber(0);
+
+      const unlockBeginAmountOnInterval = unlockBeginSum.find(s => s.ethereumSymbol === token.ethereumSymbol) ? unlockBeginSum.find(s => s.ethereumSymbol === token.ethereumSymbol).value : "0";
+      const unlockEndAmountOnInterval = unlockEndSum.find(s => s.ethereumSymbol === token.ethereumSymbol) ? unlockEndSum.find(s => s.ethereumSymbol === token.ethereumSymbol).value : "0";
+      const unlockAmountOnInterval = new BigNumber(unlockEndAmountOnInterval).minus(unlockBeginAmountOnInterval);
+      const unwrapUsdVolume = endOfIntervalNotionalValue ? new BigNumber(endOfIntervalNotionalValue.value).multipliedBy(unlockAmountOnInterval) : new BigNumber(0);
+
+      const wrapReward = getTokenRewardForPeriod(start, end, token);
+      const endOfIntervalWrapTezosRatio = await this._wrapPriceRepository.find(end);
+      const endOfIntervalTezosUsdPrice = await this._notionalRepository.find("XTZ", end);
+      const endOfIntervalWrapUsdPrice = new BigNumber(endOfIntervalWrapTezosRatio.value).multipliedBy(endOfIntervalTezosUsdPrice.value);
+      const wrapRewardUsdValue = endOfIntervalWrapUsdPrice.multipliedBy(wrapReward);
+
+      const roi = wrapRewardUsdValue.dividedBy(wrapUsdVolume);
+
       if (token.allocation > 0) {
-        const endOfIntervalNotionalValue = endOfIntervalNotionalValues.find(v => v.asset === token.ethereumSymbol);
-
-        const lockBeginAmountOnInterval = lockBeginSum.find(s => s.ethereumSymbol === token.ethereumSymbol) ? lockBeginSum.find(s => s.ethereumSymbol === token.ethereumSymbol).value : "0";
-        const lockEndAmountOnInterval = lockEndSum.find(s => s.ethereumSymbol === token.ethereumSymbol) ? lockEndSum.find(s => s.ethereumSymbol === token.ethereumSymbol).value : "0";
-        const lockAmountOnInterval = new BigNumber(lockEndAmountOnInterval).minus(lockBeginAmountOnInterval);
-        const wrapUsdVolume = endOfIntervalNotionalValue ? new BigNumber(endOfIntervalNotionalValue.value).multipliedBy(lockAmountOnInterval) : new BigNumber(0);
-
-        const unlockBeginAmountOnInterval = unlockBeginSum.find(s => s.ethereumSymbol === token.ethereumSymbol) ? unlockBeginSum.find(s => s.ethereumSymbol === token.ethereumSymbol).value : "0";
-        const unlockEndAmountOnInterval = unlockEndSum.find(s => s.ethereumSymbol === token.ethereumSymbol) ? unlockEndSum.find(s => s.ethereumSymbol === token.ethereumSymbol).value : "0";
-        const unlockAmountOnInterval = new BigNumber(unlockEndAmountOnInterval).minus(unlockBeginAmountOnInterval);
-        const unwrapUsdVolume = endOfIntervalNotionalValue ? new BigNumber(endOfIntervalNotionalValue.value).multipliedBy(unlockAmountOnInterval) : new BigNumber(0);
-
-        const generatedFees = lockAmountOnInterval.multipliedBy(0.0015).plus(unlockAmountOnInterval.multipliedBy(0.0015));
-        const generatedFeesInUsd = endOfIntervalNotionalValue ? new BigNumber(endOfIntervalNotionalValue.value).multipliedBy(generatedFees) : new BigNumber(0);
-
-        const wrapReward = getTokenRewardForPeriod(start, end, token);
-        const endOfIntervalWrapTezosRatio = await this._wrapPriceRepository.find(end);
-        const endOfIntervalTezosUsdPrice = await this._notionalRepository.find("XTZ", end);
-        const endOfIntervalWrapUsdPrice = new BigNumber(endOfIntervalWrapTezosRatio.value).multipliedBy(endOfIntervalTezosUsdPrice.value);
-        const wrapRewardUsdValue = endOfIntervalWrapUsdPrice.multipliedBy(wrapReward);
-
-        const roi = wrapRewardUsdValue.dividedBy(wrapUsdVolume);
-
         result.tokens.push({
           asset: token.ethereumSymbol,
           wrapVolume: lockAmountOnInterval.toString(10),
@@ -90,19 +87,24 @@ export class GlobalStatsQuery {
           wrapRewardUsd: wrapRewardUsdValue.toString(10),
           roi: roi.toString(10)
         });
-
-        result.fees.push({
-          asset: token.ethereumSymbol,
-          wrapVolume: lockAmountOnInterval.toString(10),
-          wrapVolumeUsd: wrapUsdVolume.toString(10),
-          unwrapVolume: unlockAmountOnInterval.toString(10),
-          unwrapVolumeUsd: unwrapUsdVolume.toString(10),
-          fees: generatedFees.toString(10),
-          feesUsd: generatedFeesInUsd.toString(10)
-        });
       }
-    }
 
+      const generatedFees = lockAmountOnInterval.multipliedBy(0.0015).plus(unlockAmountOnInterval.multipliedBy(0.0015));
+      let generatedFeesInUsd = endOfIntervalNotionalValue ? new BigNumber(endOfIntervalNotionalValue.value).multipliedBy(generatedFees) : new BigNumber(0);
+      if (token.tezosSymbol === "WRAP") {
+        generatedFeesInUsd = endOfIntervalWrapUsdPrice.multipliedBy(generatedFees);
+      }
+
+      result.fees.push({
+        asset: token.ethereumSymbol,
+        wrapVolume: lockAmountOnInterval.toString(10),
+        wrapVolumeUsd: wrapUsdVolume.toString(10),
+        unwrapVolume: unlockAmountOnInterval.toString(10),
+        unwrapVolumeUsd: unwrapUsdVolume.toString(10),
+        fees: generatedFees.toString(10),
+        feesUsd: generatedFeesInUsd.toString(10)
+      });
+    }
 
     return result;
   }
