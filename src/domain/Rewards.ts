@@ -23,10 +23,12 @@ const rewards: Record<number, number> = {
   1630936800000: 671456,
 };
 
-const globalRewardsUserAllocation = 0.4;
+const initialGlobalRewardsUserAllocation = 0.4;
+const globalRewardsUserAllocationFromWeekStarting1623679200000 = 0.12;
 const totalTokenAllocation = 27;
 
 export function getTokenRewardForPeriod(start: number, end: number, token: Token): number {
+  const globalRewardsUserAllocation = (start >= 1623679200000) ? globalRewardsUserAllocationFromWeekStarting1623679200000 : initialGlobalRewardsUserAllocation;
   let globalRewardForPeriod = 0;
   Object.keys(rewards).forEach(key => {
     const rewardStart = parseInt(key);
