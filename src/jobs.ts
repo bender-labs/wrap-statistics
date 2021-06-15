@@ -10,6 +10,7 @@ import {NotionalUsdIndexer} from "./indexers/notional/NotionalUsdIndexer";
 import {WrapXtzPriceIndexer} from "./indexers/wrap/WrapXtzPriceIndexer";
 import {WrapUsdVolumeBuilder} from "./projections/WrapUsdVolumeBuilder";
 import {RewardsBuilder} from "./projections/RewardsBuilder";
+import {StakingApyIndexer} from "./indexers/staking/StakingApyIndexer";
 
 const everyMinute = "* * * * *";
 const every5Minutes = "*/5 * * * *";
@@ -25,6 +26,7 @@ export function scheduleJobs(dependencies: StatisticsDependencies): Crontab {
   crontab.register(() => new EthereumFinalUnwrapIndexer(dependencies).index(), everyMinute);
   crontab.register(() => new WrapXtzPriceIndexer(dependencies).index(), everyMinute);
   crontab.register(() => new NotionalUsdIndexer(dependencies).index(), everyHourAt3, true);
+  crontab.register(() => new StakingApyIndexer(dependencies).index(), every5Minutes, true);
   crontab.register(() => new TotalValueLockedBuilder(dependencies).build(), every5Minutes, true);
   crontab.register(() => new WrapUsdVolumeBuilder(dependencies).build(), every5Minutes, true);
   crontab.register(() => new RewardsBuilder(dependencies).build(), every5Minutes, true);
