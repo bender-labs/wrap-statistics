@@ -7,6 +7,7 @@ import configurationRouter from "./ConfigurationRouter";
 import {StatisticsDependencies} from "../../indexers/StatisticsDependencies";
 import rewardsRouter from "./RewardsRouter";
 import stakingRouter from "./StakingRouter";
+import liquidityMiningRouter from "./LiquidityMiningRouter";
 
 function baseRouter(dependencies: StatisticsDependencies): Router {
   const router = new Router();
@@ -20,6 +21,7 @@ function baseRouter(dependencies: StatisticsDependencies): Router {
   router.use("/global-stats", statsRouter(dependencies));
   router.use("/rewards", rewardsRouter(dependencies));
   router.use("/staking", stakingRouter(dependencies));
+  router.use("/liquidity-mining", liquidityMiningRouter(dependencies));
   return router;
 }
 

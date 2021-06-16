@@ -16,7 +16,7 @@ export class StakingApyIndexer {
     this._logger = logger;
     this._wrapIndexer = new WrapIndexer();
     this._notionalUsdRepository = new NotionalUsdRepository(dbClient);
-    this._wrapPriceRepository = new WrapXtzPriceRepository(dbClient)
+    this._wrapPriceRepository = new WrapXtzPriceRepository(dbClient);
     this._stakingApyRepository = new StakingApyRepository(dbClient);
     this._dbClient = dbClient;
   }

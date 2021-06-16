@@ -4,6 +4,7 @@ import {EthereumConfig, TezosConfig} from "../configuration";
 import {ethers} from "ethers";
 import {TezosToolkit} from "@taquito/taquito";
 import {IpfsClient} from "../infrastructure/ipfsClient";
+import {TzktProvider} from "../infrastructure/tezos/tzktProvider";
 
 export type StatisticsDependencies = {
   logger: Logger;
@@ -13,4 +14,5 @@ export type StatisticsDependencies = {
   tezosConfiguration: TezosConfig;
   tezosToolkit: TezosToolkit;
   ipfsClient: IpfsClient;
+  tzktProvider: TzktProvider;
 }

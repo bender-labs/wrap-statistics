@@ -23,6 +23,9 @@ export type TezosConfig = {
 export type Config = {
   ethereum: EthereumConfig;
   tezos: TezosConfig;
+  tzkt: {
+    url: string;
+  },
   ipfs: {
     nodeUrl: string;
   };
@@ -101,6 +104,12 @@ export function loadConfiguration(): Config {
         env: 'TEZOS_QUIPUSWAP_WRAP_XTZ_FIRST_BLOCK_TO_INDEX',
         type: 'integer',
         default: 1445751
+      }
+    },
+    tzkt: {
+      url: {
+        env: 'TZKT_URL',
+        default: 'https://api.tzkt.io/v1'
       }
     },
     ipfs: {

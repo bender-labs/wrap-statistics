@@ -8,6 +8,7 @@ import {createTezosToolkit} from "./infrastructure/tezos/toolkitProvider";
 import * as dotenv from "dotenv";
 import {httpServer} from "./web/Server";
 import {createIpfsClient} from './infrastructure/ipfsClient';
+import {createTzKt} from "./infrastructure/tezos/tzktProvider";
 
 dotenv.config();
 
@@ -20,7 +21,8 @@ const dependencies: StatisticsDependencies = {
   dbClient: createDbClient(configuration),
   tezosConfiguration: configuration.tezos,
   tezosToolkit: createTezosToolkit(configuration.tezos.rpc),
-  ipfsClient: createIpfsClient(configuration)
+  ipfsClient: createIpfsClient(configuration),
+  tzktProvider: createTzKt(configuration.tzkt.url)
 };
 
 const crontab = scheduleJobs(dependencies);
