@@ -78,7 +78,7 @@ export class GlobalStatsQuery {
 
       const roi = wrapRewardUsdValue.dividedBy(wrapUsdVolume);
 
-      if (token.allocation > 0) {
+      if (token.allocation(start) > 0) {
         result.tokens.push({
           asset: token.ethereumSymbol,
           wrapVolume: lockAmountOnInterval.toString(10),

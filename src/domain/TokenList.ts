@@ -1,5 +1,11 @@
 import {Token} from "./Token";
 
+const startOfWeek11 = 1625493600000;
+
+export function totalTokenAllocation(startWeek: number): number {
+  return tokenList.reduce((acc, value) => acc + value.allocation(startWeek), 0)
+}
+
 const tokenList: Token[] = [{
   token: "0x7fc66500c84a76ad7e9c93437bfc5ac33e2ddae9",
   tezosContract: 'KT18fp5rcTW7mbWDmzFwjLDUhs5MeJmagDSZ',
@@ -10,7 +16,8 @@ const tokenList: Token[] = [{
   coincapAssetId: "aave",
   coinmetricsAssetId: "aave",
   type: "ERC20",
-  allocation: 1
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  allocation: (_startWeek: number) => (1)
 }, {
   token: "0x4Fabb145d64652a948d72533023f6E7A623C7C53",
   tezosContract: 'KT18fp5rcTW7mbWDmzFwjLDUhs5MeJmagDSZ',
@@ -21,7 +28,8 @@ const tokenList: Token[] = [{
   coincapAssetId: "binance-usd",
   coinmetricsAssetId: "busd",
   type: "ERC20",
-  allocation: 1
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  allocation: (_startWeek: number) => (1)
 }, {
   token: "0xaaaebe6fe48e54f431b0c390cfaf0b017d09d42d",
   tezosContract: 'KT18fp5rcTW7mbWDmzFwjLDUhs5MeJmagDSZ',
@@ -32,7 +40,8 @@ const tokenList: Token[] = [{
   coincapAssetId: "celsius",
   coinmetricsAssetId: "",
   type: "ERC20",
-  allocation: 1
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  allocation: (_startWeek: number) => (1)
 }, {
   token: "0xc00e94cb662c3520282e6f5717214004a7f26888",
   tezosContract: 'KT18fp5rcTW7mbWDmzFwjLDUhs5MeJmagDSZ',
@@ -43,7 +52,7 @@ const tokenList: Token[] = [{
   coincapAssetId: "compound",
   coinmetricsAssetId: "comp",
   type: "ERC20",
-  allocation: 1
+  allocation: (startWeek: number) => startWeek >= startOfWeek11 ? 0 : 1
 }, {
   token: "0xa0b73e1ff0b80914ab6fe0444e65848c4c34450b",
   tezosContract: 'KT18fp5rcTW7mbWDmzFwjLDUhs5MeJmagDSZ',
@@ -54,7 +63,8 @@ const tokenList: Token[] = [{
   coincapAssetId: "crypto-com-coin",
   coinmetricsAssetId: "cro",
   type: "ERC20",
-  allocation: 1
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  allocation: (_startWeek: number) => (1)
 }, {
   token: "0x6b175474e89094c44da98b954eedeac495271d0f",
   tezosContract: 'KT18fp5rcTW7mbWDmzFwjLDUhs5MeJmagDSZ',
@@ -65,7 +75,8 @@ const tokenList: Token[] = [{
   coincapAssetId: "multi-collateral-dai",
   coinmetricsAssetId: "dai",
   type: "ERC20",
-  allocation: 1
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  allocation: (_startWeek: number) => (1)
 }, {
   token: "0x50d1c9771902476076ecfc8b2a83ad6b9355a4c9",
   tezosContract: 'KT18fp5rcTW7mbWDmzFwjLDUhs5MeJmagDSZ',
@@ -76,7 +87,7 @@ const tokenList: Token[] = [{
   coincapAssetId: "ftx-token",
   coinmetricsAssetId: "ftt",
   type: "ERC20",
-  allocation: 1
+  allocation: (startWeek: number) => startWeek >= startOfWeek11 ? 0 : 1
 }, {
   token: "0x6f259637dcd74c767781e37bc6133cd6a68aa161",
   tezosContract: 'KT18fp5rcTW7mbWDmzFwjLDUhs5MeJmagDSZ',
@@ -87,7 +98,7 @@ const tokenList: Token[] = [{
   coincapAssetId: "huobi-token",
   coinmetricsAssetId: "ht",
   type: "ERC20",
-  allocation: 1
+  allocation: (startWeek: number) => startWeek >= startOfWeek11 ? 0 : 1
 }, {
   token: "0xdf574c24545e5ffecb9a659c229253d4111d87e1",
   tezosContract: 'KT18fp5rcTW7mbWDmzFwjLDUhs5MeJmagDSZ',
@@ -98,7 +109,8 @@ const tokenList: Token[] = [{
   coincapAssetId: "husd",
   coinmetricsAssetId: "husd",
   type: "ERC20",
-  allocation: 1
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  allocation: (_startWeek: number) => (1)
 }, {
   token: "0x2af5d2ad76741191d15dfe7bf6ac92d4bd912ca3",
   tezosContract: 'KT18fp5rcTW7mbWDmzFwjLDUhs5MeJmagDSZ',
@@ -109,7 +121,7 @@ const tokenList: Token[] = [{
   coincapAssetId: "unus-sed-leo",
   coinmetricsAssetId: "leo_eth",
   type: "ERC20",
-  allocation: 1
+  allocation: (startWeek: number) => startWeek >= startOfWeek11 ? 0 : 1
 }, {
   token: "0x7d1afa7b718fb893db30a3abc0cfc608aacfebb0",
   tezosContract: 'KT18fp5rcTW7mbWDmzFwjLDUhs5MeJmagDSZ',
@@ -120,7 +132,7 @@ const tokenList: Token[] = [{
   coincapAssetId: "matic-network",
   coinmetricsAssetId: "",
   type: "ERC20",
-  allocation: 1
+  allocation: (startWeek: number) => startWeek >= startOfWeek11 ? 2 : 1
 }, {
   token: "0x9f8f72aa9304c8b593d555f12ef6589cc3a579a2",
   tezosContract: 'KT18fp5rcTW7mbWDmzFwjLDUhs5MeJmagDSZ',
@@ -131,7 +143,8 @@ const tokenList: Token[] = [{
   coincapAssetId: "maker",
   coinmetricsAssetId: "mkr",
   type: "ERC20",
-  allocation: 1
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  allocation: (_startWeek: number) => (1)
 }, {
   token: "0x75231f58b43240c9718dd58b4967c5114342a86c",
   tezosContract: 'KT18fp5rcTW7mbWDmzFwjLDUhs5MeJmagDSZ',
@@ -142,7 +155,7 @@ const tokenList: Token[] = [{
   coincapAssetId: "okb",
   coinmetricsAssetId: "",
   type: "ERC20",
-  allocation: 1
+  allocation: (startWeek: number) => startWeek >= startOfWeek11 ? 0 : 1
 }, {
   token: "0x8e870d67f660d95d5be530380d0ec0bd388289e1",
   tezosContract: 'KT18fp5rcTW7mbWDmzFwjLDUhs5MeJmagDSZ',
@@ -153,7 +166,8 @@ const tokenList: Token[] = [{
   coincapAssetId: "paxos-standard-token",
   coinmetricsAssetId: "pax",
   type: "ERC20",
-  allocation: 1
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  allocation: (_startWeek: number) => (1)
 }, {
   token: "0x6b3595068778dd592e39a122f4f5a5cf09c90fe2",
   tezosContract: 'KT18fp5rcTW7mbWDmzFwjLDUhs5MeJmagDSZ',
@@ -164,7 +178,8 @@ const tokenList: Token[] = [{
   coincapAssetId: "sushiswap",
   coinmetricsAssetId: "sushi",
   type: "ERC20",
-  allocation: 1
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  allocation: (_startWeek: number) => (1)
 }, {
   token: "0x1f9840a85d5af5bf1d1762f925bdaddc4201f984",
   tezosContract: 'KT18fp5rcTW7mbWDmzFwjLDUhs5MeJmagDSZ',
@@ -175,7 +190,7 @@ const tokenList: Token[] = [{
   coincapAssetId: "uniswap",
   coinmetricsAssetId: "uni",
   type: "ERC20",
-  allocation: 2
+  allocation: (startWeek: number) => startWeek >= startOfWeek11 ? 1 : 2
 }, {
   token: "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
   tezosContract: 'KT18fp5rcTW7mbWDmzFwjLDUhs5MeJmagDSZ',
@@ -186,7 +201,8 @@ const tokenList: Token[] = [{
   coincapAssetId: "usd-coin",
   coinmetricsAssetId: "usdc",
   type: "ERC20",
-  allocation: 2
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  allocation: (_startWeek: number) => (2)
 }, {
   token: "0xdac17f958d2ee523a2206206994597c13d831ec7",
   tezosContract: 'KT18fp5rcTW7mbWDmzFwjLDUhs5MeJmagDSZ',
@@ -197,7 +213,8 @@ const tokenList: Token[] = [{
   coincapAssetId: "tether",
   coinmetricsAssetId: "usdt",
   type: "ERC20",
-  allocation: 2
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  allocation: (_startWeek: number) => (2)
 }, {
   token: "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
   tezosContract: 'KT18fp5rcTW7mbWDmzFwjLDUhs5MeJmagDSZ',
@@ -208,7 +225,8 @@ const tokenList: Token[] = [{
   coincapAssetId: "wrapped-bitcoin",
   coinmetricsAssetId: "wbtc",
   type: "ERC20",
-  allocation: 2
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  allocation: (_startWeek: number) => (2)
 }, {
   token: "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
   tezosContract: 'KT18fp5rcTW7mbWDmzFwjLDUhs5MeJmagDSZ',
@@ -219,7 +237,8 @@ const tokenList: Token[] = [{
   coincapAssetId: "ethereum",
   coinmetricsAssetId: "weth",
   type: "ERC20",
-  allocation: 2
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  allocation: (_startWeek: number) => (2)
 }, {
   token: "0x514910771af9ca656af840dff83e8264ecf986ca",
   tezosContract: 'KT18fp5rcTW7mbWDmzFwjLDUhs5MeJmagDSZ',
@@ -230,7 +249,8 @@ const tokenList: Token[] = [{
   coincapAssetId: "chainlink",
   coinmetricsAssetId: "link",
   type: "ERC20",
-  allocation: 2
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  allocation: (_startWeek: number) => (2)
 }, {
   token: "0x7421A18dE2eE1dC8b84E42Eb00D8B73578c23526",
   tezosContract: 'KT1LRboPna9yQY9BrjtQYDS1DVxhKESK4VVd',
@@ -241,7 +261,8 @@ const tokenList: Token[] = [{
   coincapAssetId: "",
   coinmetricsAssetId: "",
   type: "ERC20",
-  allocation: 0
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  allocation: (_startWeek: number) => (0)
 }];
 
 export default tokenList;

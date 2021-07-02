@@ -1,4 +1,5 @@
 import {Token} from "./Token";
+import {totalTokenAllocation} from "./TokenList";
 
 const rewards: Record<number, number> = {
   1619445600000: 767719,
@@ -25,7 +26,6 @@ const rewards: Record<number, number> = {
 
 const initialGlobalRewardsUserAllocation = 0.4;
 const globalRewardsUserAllocationFromWeekStarting1623679200000 = 0.12;
-const totalTokenAllocation = 27;
 
 export function getTokenRewardForPeriod(start: number, end: number, token: Token): number {
   const globalRewardsUserAllocation = (start >= 1623679200000) ? globalRewardsUserAllocationFromWeekStarting1623679200000 : initialGlobalRewardsUserAllocation;
@@ -37,6 +37,6 @@ export function getTokenRewardForPeriod(start: number, end: number, token: Token
     }
   });
 
-  return Math.floor(globalRewardForPeriod * globalRewardsUserAllocation * (token.allocation / totalTokenAllocation));
+  return Math.floor(globalRewardForPeriod * globalRewardsUserAllocation * (token.allocation(start) / totalTokenAllocation(start)));
 }
 

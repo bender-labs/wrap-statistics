@@ -10,5 +10,5 @@ export interface Token {
   coincapAssetId: string;
   coinmetricsAssetId: string;
   type: ERCType;
-  allocation: number;
+  allocation: (startWeek: number) => number;
 }
