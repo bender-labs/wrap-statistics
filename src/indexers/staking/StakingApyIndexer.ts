@@ -34,9 +34,11 @@ export class StakingApyIndexer {
         const rewardsPrice = await this._rewardsPrice(contract.token.ethereumSymbol, currentWrapPriceInUsd);
         const totalWrapStaked = new BigNumber(contract.totalStaked).shiftedBy(-wrapPrecision);
         const apy = await this._calculateApy(currentAvailableRewards, rewardsPrice, totalWrapStaked, currentWrapPriceInUsd);
+        const apr = await this._calculateApr(currentAvailableRewards, rewardsPrice, totalWrapStaked, currentWrapPriceInUsd);
         result.push({
           asset: contract.token.ethereumSymbol,
           apy: apy.toString(10),
+          apr: apr.toString(10),
           totalRewards: currentAvailableRewards.toString(10),
           totalRewardsInUsd: currentAvailableRewards.multipliedBy(rewardsPrice).toString(10),
           totalStaked: totalWrapStaked.toString(10),
@@ -64,6 +66,14 @@ export class StakingApyIndexer {
       .dividedBy(
         totalWrapStaked.multipliedBy(currentWrapPriceInUsd)
       ).plus(1).exponentiatedBy(52).minus(1).multipliedBy(100);
+  }
+
+  private async _calculateApr(currentAvailableRewards: BigNumber, rewardsPrice: BigNumber, totalWrapStaked: BigNumber, currentWrapPriceInUsd: BigNumber): Promise<BigNumber> {
+    return currentAvailableRewards
+      .multipliedBy(rewardsPrice)
+      .dividedBy(
+        totalWrapStaked.multipliedBy(currentWrapPriceInUsd)
+      ).multipliedBy(52).multipliedBy(100);
   }
 
   private async _rewardsPrice(token: string, currentWrapPriceInUsd: BigNumber) {

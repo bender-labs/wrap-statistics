@@ -61,10 +61,12 @@ export class LiquidityMiningPoolsIndexer {
         const wrapRewardsPerDay = wrapRewardsPerBlock.multipliedBy(60 / blockDurationInSeconds).multipliedBy(60 * 24);
         const wrapRewardsPerDayInUsd = wrapRewardsPerDay.multipliedBy(currentWrapPriceInUsd);
         const apy = wrapRewardsPerDayInUsd.dividedBy(totalDollarsInLiquidityPool).plus(1).exponentiatedBy(365).minus(1).multipliedBy(100);
+        const apr = wrapRewardsPerDayInUsd.dividedBy(totalDollarsInLiquidityPool).multipliedBy(365).multipliedBy(100);
         result.push({
           base: program.base,
           quote: program.quote,
           apy: apy.toString(10),
+          apr: apr.toString(10),
           totalRewardsPerDay: wrapRewardsPerDay.toString(10),
           totalRewardsPerDayInUsd: wrapRewardsPerDayInUsd.toString(10),
           totalStakedInUsd: totalDollarsInLiquidityPool.toString(10),
