@@ -129,7 +129,7 @@ const tokenList: Token[] = [{
   ethereumSymbol: "MATIC",
   tezosSymbol: "wMATIC",
   decimals: 18,
-  coincapAssetId: "matic-network",
+  coincapAssetId: "polygon",
   coinmetricsAssetId: "",
   type: "ERC20",
   allocation: (startWeek: number) => startWeek >= startOfWeek11 ? 2 : 1
