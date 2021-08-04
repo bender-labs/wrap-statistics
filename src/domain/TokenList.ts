@@ -38,7 +38,7 @@ const tokenList: Token[] = [{
   tezosSymbol: "wCEL",
   decimals: 4,
   coincapAssetId: "celsius",
-  coinmetricsAssetId: "",
+  coinmetricsAssetId: "cel",
   type: "ERC20",
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   allocation: (_startWeek: number) => (1)
@@ -130,7 +130,7 @@ const tokenList: Token[] = [{
   tezosSymbol: "wMATIC",
   decimals: 18,
   coincapAssetId: "polygon",
-  coinmetricsAssetId: "",
+  coinmetricsAssetId: "matic",
   type: "ERC20",
   allocation: (startWeek: number) => startWeek >= startOfWeek11 ? 2 : 1
 }, {
@@ -153,7 +153,7 @@ const tokenList: Token[] = [{
   tezosSymbol: "wOKB",
   decimals: 18,
   coincapAssetId: "okb",
-  coinmetricsAssetId: "",
+  coinmetricsAssetId: "okb",
   type: "ERC20",
   allocation: (startWeek: number) => startWeek >= startOfWeek11 ? 0 : 1
 }, {
@@ -163,7 +163,7 @@ const tokenList: Token[] = [{
   ethereumSymbol: "PAX",
   tezosSymbol: "wPAX",
   decimals: 18,
-  coincapAssetId: "paxos-standard-token",
+  coincapAssetId: "paxos-standard",
   coinmetricsAssetId: "pax",
   type: "ERC20",
   // eslint-disable-next-line @typescript-eslint/no-unused-vars

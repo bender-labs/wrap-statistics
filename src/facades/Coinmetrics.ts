@@ -24,13 +24,13 @@ export class Coinmetrics {
     const previousIsoDay = BenderTime.getPreviousIsoDay(timestamp);
 
     try {
-      const response = await request.get("https://community-api.coinmetrics.io/v4/timeseries/asset-metrics?assets=" + assetId + "&metrics=PriceUSD&frequency=1d&start_time=" + previousIsoDay + "&end_time=" + previousIsoDay);
+      const response = await request.get("https://community-api.coinmetrics.io/v4/timeseries/asset-metrics?assets=" + assetId + "&metrics=ReferenceRateUSD&frequency=1d&start_time=" + previousIsoDay + "&end_time=" + previousIsoDay);
 
       if (response && response.status === 200) {
         const prices = response.body;
         if (prices && prices["data"] && prices["data"].length > 0) {
-          logger.debug("coinmetrics : notional value for " + assetId + " @ timestamp " + timestamp + " = " + prices["data"][0]["PriceUSD"]);
-          return +prices["data"][0]["PriceUSD"];
+          logger.debug("coinmetrics : notional value for " + assetId + " @ timestamp " + timestamp + " = " + prices["data"][0]["ReferenceRateUSD"]);
+          return +prices["data"][0]["ReferenceRateUSD"];
         }
       }
     } catch (err) {

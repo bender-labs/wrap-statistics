@@ -52,11 +52,13 @@ export class NotionalUsdIndexer {
       if (usdPrice === 0) {
         usdPrice = await this._coinMetrics.getUsdPriceForToken(currentIndexingTimeMs, token.token, this._logger);
       }
-      await this._notionalUsdRepository.save({
-        value: usdPrice ? usdPrice.toString() : (token.ethereumSymbol === "HUSD" ? "1" : "0"),
-        asset: token.ethereumSymbol,
-        timestamp: currentIndexingTimeMs
-      }, transaction);
+      if (usdPrice !== 0) {
+        await this._notionalUsdRepository.save({
+          value: usdPrice.toString(),
+          asset: token.ethereumSymbol,
+          timestamp: currentIndexingTimeMs
+        }, transaction);
+      }
     }
   }
 
