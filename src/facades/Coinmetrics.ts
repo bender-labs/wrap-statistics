@@ -34,7 +34,7 @@ export class Coinmetrics {
         }
       }
     } catch (err) {
-      logger.error(err);
+      logger.error(err.message);
     }
 
     return 0;
