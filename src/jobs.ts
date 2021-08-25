@@ -12,6 +12,9 @@ import {WrapUsdVolumeBuilder} from "./projections/WrapUsdVolumeBuilder";
 import {RewardsBuilder} from "./projections/RewardsBuilder";
 import {StakingApyIndexer} from "./indexers/staking/StakingApyIndexer";
 import {LiquidityMiningPoolsIndexer} from "./indexers/liquidity/LiquidityMiningPoolsIndexer";
+import {WrapTokenUsdPriceBuilder} from "./projections/WrapTokenUsdPriceBuilder";
+import {WrapTokenTotalSupplyIndexer} from "./indexers/wrap/WrapTokenTotalSupplyIndexer";
+import {WrapTokenMarketcapBuilder} from "./projections/WrapTokenMarketcapBuilder";
 
 const everyMinute = "* * * * *";
 const every5Minutes = "*/5 * * * *";
@@ -29,8 +32,11 @@ export function scheduleJobs(dependencies: StatisticsDependencies): Crontab {
   crontab.register(() => new NotionalUsdIndexer(dependencies).index(), everyHourAt3, true);
   crontab.register(() => new StakingApyIndexer(dependencies).index(), every5Minutes, true);
   crontab.register(() => new LiquidityMiningPoolsIndexer(dependencies).index(), every5Minutes, true);
+  crontab.register(() => new WrapTokenTotalSupplyIndexer(dependencies).index(), every5Minutes, true);
   crontab.register(() => new TotalValueLockedBuilder(dependencies).build(), every5Minutes, true);
   crontab.register(() => new WrapUsdVolumeBuilder(dependencies).build(), every5Minutes, true);
   crontab.register(() => new RewardsBuilder(dependencies).build(), every5Minutes, true);
+  crontab.register(() => new WrapTokenUsdPriceBuilder(dependencies).build(), every5Minutes, true);
+  crontab.register(() => new WrapTokenMarketcapBuilder(dependencies).build(), every5Minutes, true);
   return crontab;
 }

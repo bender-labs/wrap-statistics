@@ -180,6 +180,51 @@ export class AppStateRepository {
     );
   }
 
+  async getLastWrapTokenTotalSupplyIndexedLevel(): Promise<number | null> {
+    const item = await this._getValue('last_wrap_token_total_supply_level');
+    return item ? +item.value : null;
+  }
+
+  async setLastWrapTokenTotalSupplyIndexedLevel(
+    level: number,
+    transaction: Knex.Transaction
+  ): Promise<void> {
+    await this._setValue(
+      {key: 'last_wrap_token_total_supply_level', value: level.toString()},
+      transaction
+    );
+  }
+
+  async getLastWrapTokenUsdPrice(): Promise<number | null> {
+    const item = await this._getValue('last_wrap_token_usd_price');
+    return item ? +item.value : null;
+  }
+
+  async setLastWrapTokenUsdPrice(
+    timestamp: number,
+    transaction: Knex.Transaction
+  ): Promise<void> {
+    await this._setValue(
+      {key: 'last_wrap_token_usd_price', value: timestamp.toString()},
+      transaction
+    );
+  }
+
+  async getLastWrapTokenMarketcap(): Promise<number | null> {
+    const item = await this._getValue('last_wrap_token_marketcap');
+    return item ? +item.value : null;
+  }
+
+  async setLastWrapTokenMarketcap(
+    timestamp: number,
+    transaction: Knex.Transaction
+  ): Promise<void> {
+    await this._setValue(
+      {key: 'last_wrap_token_marketcap', value: timestamp.toString()},
+      transaction
+    );
+  }
+
   async _getValue(key: string): Promise<AppStateItem | null> {
     return this._dbClient
       .table<AppStateItem>('app_state')

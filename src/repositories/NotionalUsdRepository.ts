@@ -21,6 +21,13 @@ export class NotionalUsdRepository {
       .orderBy("timestamp", "desc");
   }
 
+  async findAllBetween(asset: string, start: number, stop: number): Promise<Array<NotionalUsd>> {
+    return this._dbClient.from<NotionalUsd>("notional_usd")
+      .where({asset: asset})
+      .andWhere("timestamp", ">=", start)
+      .andWhere("timestamp", "<=", stop);
+  }
+
   async findAll(currentTimestamp: number): Promise<NotionalUsd[]> {
     const result = await this._dbClient.raw('select t1.* ' +
       'from notional_usd as t1 inner join ' +

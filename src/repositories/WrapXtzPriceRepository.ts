@@ -20,5 +20,10 @@ export class WrapXtzPriceRepository {
       .orderBy("timestamp", "desc");
   }
 
+  async findByLevel(level: number): Promise<WrapXtzPrice> {
+    return this._dbClient.first("*").from<WrapXtzPrice>("wrap_price")
+      .where({level});
+  }
+
   private _dbClient: Knex;
 }
