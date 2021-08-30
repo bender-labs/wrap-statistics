@@ -14,6 +14,11 @@ export class ProjectionWrapTokenInUsdRepository {
       .insert(wrapTokenInUsd);
   }
 
+  async last(): Promise<WrapTokenInUsd> {
+    return this._dbClient.first("*").from<WrapTokenInUsd>("projection_wrap_token_in_usd")
+      .orderBy("timestamp", "desc");
+  }
+
   async findFrom(timestamp: number): Promise<WrapTokenInUsd[]> {
     return this._dbClient("projection_wrap_token_in_usd")
       .where("timestamp", ">=", timestamp);

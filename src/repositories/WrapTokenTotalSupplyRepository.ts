@@ -26,5 +26,10 @@ export class WrapTokenTotalSupplyRepository {
       .where({level});
   }
 
+  async last(): Promise<WrapTokenTotalSupply> {
+    return this._dbClient.first("*").from<WrapXtzPrice>("wrap_token_total_supply")
+      .orderBy("timestamp", "desc");
+  }
+
   private _dbClient: Knex;
 }
