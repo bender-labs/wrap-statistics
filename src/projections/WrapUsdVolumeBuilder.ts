@@ -59,7 +59,7 @@ export class WrapUsdVolumeBuilder {
     const endWrappingVolumeForAllTokens = await this._ethereumLockRepository.sumAll(currentIndexingTimeMs);
     const endOfIntervalNotionalValues = await this._notionalRepository.findAll(currentIndexingTimeMs);
 
-    for (const token of tokenList) {
+    for (const token of tokenList.filter(t => t.type === "ERC20")) {
       const tokenWrapVolume = this._getTokenWrapVolume(token, startWrappingVolumeForAllTokens, endWrappingVolumeForAllTokens);
       const tokenWrapVolumeUsdValue = this._getTokenWrapVolumeUsdValue(token, tokenWrapVolume, endOfIntervalNotionalValues);
 
@@ -123,7 +123,7 @@ export class WrapUsdVolumeBuilder {
     const endWrappingVolumeForAllTokens = await this._ethereumLockRepository.sumAll(end);
     const endOfIntervalNotionalValues = await this._notionalRepository.findAll(end);
 
-    for (const token of tokenList) {
+    for (const token of tokenList.filter(t => t.type === "ERC20")) {
       const tokenWrapVolume = this._getTokenWrapVolume(token, startWrappingVolumeForAllTokens, endWrappingVolumeForAllTokens);
       const tokenUsdWrapVolume = this._getTokenWrapVolumeUsdValue(token, tokenWrapVolume, endOfIntervalNotionalValues);
 

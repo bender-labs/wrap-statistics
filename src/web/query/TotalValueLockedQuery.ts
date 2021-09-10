@@ -42,7 +42,7 @@ export class TotalValueLockedQuery {
 
     const totalValueLockeds = await this._tvlRepository.findAll(timestamp);
 
-    for (const token of tokenList) {
+    for (const token of tokenList.filter(t => t.type === "ERC20")) {
       const totalValueLocked = totalValueLockeds.find(t => t.asset === token.ethereumSymbol);
 
       if (totalValueLocked) {

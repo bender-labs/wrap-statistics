@@ -82,7 +82,7 @@ export class RewardsBuilder {
     const startWrappingVolumeForAllTokens = await this._ethereumLockRepository.sumAllByAddressAndToken(currentWeekInterval.start.toMillis());
     const endWrappingVolumeForAllTokens = await this._ethereumLockRepository.sumAllByAddressAndToken(currentWeekInterval.end.toMillis());
 
-    for (const token of tokenList) {
+    for (const token of tokenList.filter(t => t.type === "ERC20")) {
       if (token.allocation(currentWeekInterval.start.toMillis()) > 0) {
         await this._buildRewardsForAllAddressesByToken(token, startWrappingVolumeForAllTokens, endWrappingVolumeForAllTokens, currentWeekInterval, transaction);
       }

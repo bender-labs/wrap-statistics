@@ -57,7 +57,7 @@ export class GlobalStatsQuery {
     const unlockEndSum = await this._ethereumUnlockRepository.sumAll(end);
     const endOfIntervalNotionalValues = await this._notionalRepository.findAll(end);
 
-    for (const token of tokenList) {
+    for (const token of tokenList.filter(t => t.type === "ERC20")) {
       const endOfIntervalNotionalValue = endOfIntervalNotionalValues.find(v => v.asset === token.ethereumSymbol);
 
       const lockBeginAmountOnInterval = lockBeginSum.find(s => s.ethereumSymbol === token.ethereumSymbol) ? lockBeginSum.find(s => s.ethereumSymbol === token.ethereumSymbol).value : "0";

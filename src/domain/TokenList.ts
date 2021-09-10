@@ -263,6 +263,66 @@ const tokenList: Token[] = [{
   type: "ERC20",
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   allocation: (_startWeek: number) => (0)
+}, {
+  token: "0x60e4d786628fea6478f785a6d7e704777c86a7c6",
+  tezosContract: 'KT1HK3YAYwAsdzc8cXozNrZ9z3UGPSaAst8M',
+  tezosTokenId: undefined,
+  ethereumSymbol: "MAYC",
+  tezosSymbol: "wMAYC",
+  decimals: 0,
+  coincapAssetId: "",
+  coinmetricsAssetId: "",
+  type: "ERC721",
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  allocation: (_startWeek: number) => (0)
+}, {
+  token: "0x629a673a8242c2ac4b7b8c5d8735fbeac21a6205",
+  tezosContract: 'KT1PG3i5HdXkQT8vjXegf7hwXHVCgUJBZUbx',
+  tezosTokenId: undefined,
+  ethereumSymbol: "SOR",
+  tezosSymbol: "wSOR",
+  decimals: 0,
+  coincapAssetId: "",
+  coinmetricsAssetId: "",
+  type: "ERC721",
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  allocation: (_startWeek: number) => (0)
+}, {
+  token: "0xb932a70a57673d89f4acffbe830e8ed7f75fb9e0",
+  tezosContract: 'KT1KZaWKd751yymjiS4XXhB8T6csTC6Ni2Yo',
+  tezosTokenId: undefined,
+  ethereumSymbol: "SUPR",
+  tezosSymbol: "wSUPR",
+  decimals: 0,
+  coincapAssetId: "",
+  coinmetricsAssetId: "",
+  type: "ERC721",
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  allocation: (_startWeek: number) => (0)
+}, {
+  token: "0xbc4ca0eda7647a8ab7c2061c2e118a18a936f13d",
+  tezosContract: 'KT1JnfomsnhEmXZNumzwB1uG5zzxi7ypHkox',
+  tezosTokenId: undefined,
+  ethereumSymbol: "BAYC",
+  tezosSymbol: "wBAYC",
+  decimals: 0,
+  coincapAssetId: "",
+  coinmetricsAssetId: "",
+  type: "ERC721",
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  allocation: (_startWeek: number) => (0)
+}, {
+  token: "0x7bd29408f11d2bfc23c34f18275bbf23bb716bc7",
+  tezosContract: 'KT1QoKc3PxkYJFSRXrVmCyFq3xb5NSF52VWs',
+  tezosTokenId: undefined,
+  ethereumSymbol: "⚇",
+  tezosSymbol: "w⚇",
+  decimals: 0,
+  coincapAssetId: "",
+  coinmetricsAssetId: "",
+  type: "ERC721",
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  allocation: (_startWeek: number) => (0)
 }];
 
 export default tokenList;

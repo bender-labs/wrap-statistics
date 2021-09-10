@@ -39,6 +39,6 @@ export class Coincap {
   }
 
   private _getBenderToken(token: string): Token {
-    return tokenList.find((elt) => elt.token.toLowerCase() === token.toLowerCase());
+    return tokenList.find((elt) => elt.type === "ERC20" && elt.token.toLowerCase() === token.toLowerCase());
   }
 }

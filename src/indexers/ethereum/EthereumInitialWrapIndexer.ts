@@ -31,7 +31,6 @@ export class EthereumInitialWrapIndexer {
 
       const rawLogs = await this._getLogs(firstBlockNumber + 1, lastBlockNumber);
       this._logger.debug(`${rawLogs.length} wrap events to index`);
-
       transaction = await this._dbClient.transaction();
       if (rawLogs.length > 0) {
         await this._addEvents(rawLogs, transaction);

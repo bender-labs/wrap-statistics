@@ -43,7 +43,7 @@ export class TotalValueLockedBuilder {
         const unlocks = await this._ethereumUnlockRepository.sumAll(currentIndexingTimeMs);
         const endOfIntervalNotionalValues = await this._notionalRepository.findAll(currentIndexingTimeMs);
 
-        for (const token of tokenList) {
+        for (const token of tokenList.filter(t => t.type === "ERC20")) {
           const tokenTotalValueLocked = this._getTokenTotalLockedVolume(token, locks, unlocks);
           const tokenUsdTotalValueLocked = this._getTokenUsdTotalLockedVolume(token, tokenTotalValueLocked, endOfIntervalNotionalValues);
 

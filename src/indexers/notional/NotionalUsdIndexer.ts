@@ -47,7 +47,7 @@ export class NotionalUsdIndexer {
   }
 
   async _notionalPriceForTokens(currentIndexingTimeMs: number, transaction: Knex.Transaction): Promise<void> {
-    for (const token of tokenList) {
+    for (const token of tokenList.filter(t => t.type === "ERC20")) {
       let usdPrice = await this._coincap.getUsdPriceForToken(token.token, currentIndexingTimeMs, this._logger);
       if (usdPrice === 0) {
         usdPrice = await this._coinMetrics.getUsdPriceForToken(currentIndexingTimeMs, token.token, this._logger);

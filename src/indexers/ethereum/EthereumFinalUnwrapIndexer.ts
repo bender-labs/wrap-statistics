@@ -86,12 +86,14 @@ export class EthereumFinalUnwrapIndexer {
       const block = await this._ethereumProvider.getBlock(transactionData.blockHash);
       const decodedCallData = EthereumFinalUnwrapIndexer._unlockInterface.decodeFunctionData("execTransaction", transactionData["data"]);
       const benderToken = EthereumFinalUnwrapIndexer._getBenderToken(decodedCallData["to"].toLowerCase());
-      const decodedTransferData = EthereumFinalUnwrapIndexer._unlockInterface.decodeFunctionData("transfer", decodedCallData["data"]);
-      const receipt = await this._ethereumProvider.getTransactionReceipt(log.transactionHash);
+      if (benderToken && benderToken.type === "ERC20") {
+        const decodedTransferData = EthereumFinalUnwrapIndexer._unlockInterface.decodeFunctionData("transfer", decodedCallData["data"]);
+        const receipt = await this._ethereumProvider.getTransactionReceipt(log.transactionHash);
 
-      if (logDescription && decodedCallData && decodedTransferData && receipt && block && transactionData && benderToken) {
-        const ethereumUnlock = EthereumFinalUnwrapIndexer._buildEthereumUnlock(logDescription, decodedCallData, decodedTransferData, receipt, block, transactionData, benderToken);
-        ethereumUnlocks.push(ethereumUnlock);
+        if (logDescription && decodedCallData && decodedTransferData && receipt && block && transactionData) {
+          const ethereumUnlock = EthereumFinalUnwrapIndexer._buildEthereumUnlock(logDescription, decodedCallData, decodedTransferData, receipt, block, transactionData, benderToken);
+          ethereumUnlocks.push(ethereumUnlock);
+        }
       }
     }));
 
