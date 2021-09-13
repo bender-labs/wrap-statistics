@@ -1,6 +1,5 @@
 import {Request, Response, Router} from 'express';
 import {StatisticsDependencies} from "../../indexers/StatisticsDependencies";
-import {StakingApyRepository} from "../../repositories/StakingApyRepository";
 import {LiquidityMiningApyRepository} from "../../repositories/LiquidityMiningApyRepository";
 
 function buildRouter(dependencies: StatisticsDependencies): Router {
