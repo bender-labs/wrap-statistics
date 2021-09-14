@@ -46,10 +46,24 @@ export class LiquidityMiningPoolsIndexer {
     this._dbClient = dbClient;
   }
 
-  private isFarmRunning(storage: LiquidityMiningStorage): boolean {
-    const totalRewards = new BigNumber(storage.farm.plannedRewards.rewardPerBlock).multipliedBy(new BigNumber(storage.farm.plannedRewards.totalBlocks));
+  private runningStats(storage: LiquidityMiningStorage, blockDurationInSeconds: number): { running: boolean, remainingBlocks: number, remainingSeconds: number } {
+    const rewardsPerBlock = new BigNumber(storage.farm.plannedRewards.rewardPerBlock);
+    const totalRewards = rewardsPerBlock.multipliedBy(new BigNumber(storage.farm.plannedRewards.totalBlocks));
     const totalPaid = new BigNumber(storage.farm.claimedRewards.paid).plus(new BigNumber(storage.farm.claimedRewards.unpaid));
-    return !totalPaid.isEqualTo(totalRewards);
+    if (totalPaid.isEqualTo(totalRewards)) {
+      return {
+        running: false,
+        remainingSeconds: 0,
+        remainingBlocks: 0
+      }
+    }
+    const remainingBlocks = totalRewards.minus(totalPaid).dividedBy(rewardsPerBlock);
+    const remainingSeconds = remainingBlocks.multipliedBy(remainingBlocks);
+    return {
+      running: true,
+      remainingBlocks: remainingBlocks.integerValue().toNumber(),
+      remainingSeconds: remainingSeconds.integerValue().toNumber()
+    };
   }
 
   async index(): Promise<void> {
@@ -72,7 +86,7 @@ export class LiquidityMiningPoolsIndexer {
         const wrapRewardsPerDayInUsd = wrapRewardsPerDay.multipliedBy(currentWrapPriceInUsd);
         const apy = wrapRewardsPerDayInUsd.dividedBy(totalDollarsInLiquidityPool).plus(1).exponentiatedBy(365).minus(1).multipliedBy(100);
         const apr = wrapRewardsPerDayInUsd.dividedBy(totalDollarsInLiquidityPool).multipliedBy(365).multipliedBy(100);
-        const isRunning = this.isFarmRunning(farmingStorage);
+        const runningStats = this.runningStats(farmingStorage, blockDurationInSeconds);
         result.push({
           base: program.base,
           quote: program.quote,
@@ -83,7 +97,7 @@ export class LiquidityMiningPoolsIndexer {
           totalStakedInUsd: totalDollarsInLiquidityPool.toString(10),
           farmingContract: program.farmingContract,
           quipuswapContract: program.quipuswapContract,
-          running: isRunning
+          ...runningStats
         });
       }
       transaction = await this._dbClient.transaction();
