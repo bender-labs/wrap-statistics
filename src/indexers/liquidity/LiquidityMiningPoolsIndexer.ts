@@ -58,7 +58,7 @@ export class LiquidityMiningPoolsIndexer {
       }
     }
     const remainingBlocks = totalRewards.minus(totalPaid).dividedBy(rewardsPerBlock);
-    const remainingSeconds = remainingBlocks.multipliedBy(remainingBlocks);
+    const remainingSeconds = remainingBlocks.multipliedBy(blockDurationInSeconds);
     return {
       running: true,
       remainingBlocks: remainingBlocks.integerValue().toNumber(),
