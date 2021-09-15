@@ -11,6 +11,7 @@ export interface WrapStakingContract {
   duration: string;
   farmingContract: string;
   token: Token;
+  old: boolean;
 }
 
 export class WrapIndexer {
@@ -32,7 +33,8 @@ export class WrapIndexer {
               startLevel: contract.rewards.startLevel,
               startTimestamp: contract.rewards.startTimestamp,
               farmingContract: contract.contract,
-              duration: contract.rewards.duration
+              duration: contract.rewards.duration,
+              old: contract.old
             });
           }
         }

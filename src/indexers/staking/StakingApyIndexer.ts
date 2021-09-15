@@ -29,7 +29,7 @@ export class StakingApyIndexer {
       const wrapPrecision = this._wrapPrecision();
       const contracts = await this._wrapIndexer.getStakingContractsData(this._logger);
       const result: Array<StakingApy> = [];
-      for (const contract of contracts) {
+      for (const contract of contracts.filter(c => !c.old)) {
         const currentAvailableRewards = new BigNumber(contract.totalRewards).shiftedBy(-contract.token.decimals);
         const rewardsPrice = await this._rewardsPrice(contract.token.ethereumSymbol, currentWrapPriceInUsd);
         const totalWrapStaked = new BigNumber(contract.totalStaked).shiftedBy(-wrapPrecision);
