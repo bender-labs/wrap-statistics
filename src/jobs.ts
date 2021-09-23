@@ -15,6 +15,7 @@ import {LiquidityMiningPoolsIndexer} from "./indexers/liquidity/LiquidityMiningP
 import {WrapTokenUsdPriceBuilder} from "./projections/WrapTokenUsdPriceBuilder";
 import {WrapTokenTotalSupplyIndexer} from "./indexers/wrap/WrapTokenTotalSupplyIndexer";
 import {WrapTokenMarketcapBuilder} from "./projections/WrapTokenMarketcapBuilder";
+import {StackingApyIndexer} from "./indexers/stacking/StackingApyIndexer";
 
 const everyMinute = "* * * * *";
 const every5Minutes = "*/5 * * * *";
@@ -31,6 +32,7 @@ export function scheduleJobs(dependencies: StatisticsDependencies): Crontab {
   crontab.register(() => new WrapXtzPriceIndexer(dependencies).index(), everyMinute);
   crontab.register(() => new NotionalUsdIndexer(dependencies).index(), everyHourAt3, true);
   crontab.register(() => new StakingApyIndexer(dependencies).index(), every5Minutes, true);
+  crontab.register(() => new StackingApyIndexer(dependencies).index(), every5Minutes, true);
   crontab.register(() => new LiquidityMiningPoolsIndexer(dependencies).index(), every5Minutes, true);
   crontab.register(() => new WrapTokenTotalSupplyIndexer(dependencies).index(), every5Minutes, true);
   crontab.register(() => new TotalValueLockedBuilder(dependencies).build(), every5Minutes, true);
