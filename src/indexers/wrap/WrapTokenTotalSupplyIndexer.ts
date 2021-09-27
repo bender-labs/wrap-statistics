@@ -37,10 +37,12 @@ export class WrapTokenTotalSupplyIndexer {
         const block = await this._tezosToolkit.rpc.getBlock({block: nextLevel.toString()});
         const blockDate = DateTime.fromISO(block.header.timestamp.toString());
         const supply = await this._getWrapTotalSupply(nextLevel);
+        const burned = await this._getTotalBurned();
         await this._wrapTotalSupplyRepository.save({
           timestamp: blockDate.toMillis(),
           level: nextLevel,
-          value: supply
+          value: supply.minus(burned).toString(10),
+          burned: burned.toString(10)
         }, transaction);
         await this._appState.setLastWrapTokenTotalSupplyIndexedLevel(nextLevel, transaction);
         await transaction.commit();
@@ -55,7 +57,7 @@ export class WrapTokenTotalSupplyIndexer {
     }
   }
 
-  private async _getWrapTotalSupply(level: number): Promise<string> {
+  private async _getWrapTotalSupply(level: number): Promise<BigNumber> {
     const wrapToken = tokenList.find(t => t.tezosSymbol === "WRAP");
     const storage = await this._tezosToolkit.rpc.getStorage(wrapToken.tezosContract, {block: level.toString()});
     const schema = await this._tezosToolkit.rpc.getScript(wrapToken.tezosContract, {block: level.toString()});
@@ -67,7 +69,15 @@ export class WrapTokenTotalSupplyIndexer {
     }
     const result = contractSchema.Execute(storage);
     const supply = result['assets']['total_supply'] as BigNumber;
-    return supply.shiftedBy(-wrapToken.decimals).toString(10);
+    return supply.shiftedBy(-wrapToken.decimals);
+  }
+
+  private async _getTotalBurned(): Promise<BigNumber> {
+    const wrapToken = tokenList.find(t => t.tezosSymbol === "WRAP");
+    const contract = await this._tezosToolkit.contract.at(wrapToken.tezosContract);
+    const storage = await contract.storage();
+    const balance: BigNumber = await storage['assets']['ledger'].get('tz1burnburnburnburnburnburnburjAYjjX');
+    return balance.shiftedBy(-wrapToken.decimals);
   }
 
   private async _getLastIndexedLevel(): Promise<number> {

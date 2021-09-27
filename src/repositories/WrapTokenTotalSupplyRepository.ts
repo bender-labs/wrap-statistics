@@ -1,5 +1,4 @@
 import {Knex} from 'knex';
-import {WrapXtzPrice} from "../domain/WrapXtzPrice";
 import {WrapTokenTotalSupply} from "../domain/WrapTokenTotalSupply";
 
 export class WrapTokenTotalSupplyRepository {
@@ -16,7 +15,7 @@ export class WrapTokenTotalSupplyRepository {
   }
 
   async find(currentTimestamp: number): Promise<WrapTokenTotalSupply> {
-    return this._dbClient.first("*").from<WrapXtzPrice>("wrap_token_total_supply")
+    return this._dbClient.first("*").from<WrapTokenTotalSupply>("wrap_token_total_supply")
       .where("timestamp", "<", currentTimestamp)
       .orderBy("timestamp", "desc");
   }
@@ -27,7 +26,7 @@ export class WrapTokenTotalSupplyRepository {
   }
 
   async last(): Promise<WrapTokenTotalSupply> {
-    return this._dbClient.first("*").from<WrapXtzPrice>("wrap_token_total_supply")
+    return this._dbClient.first("*").from<WrapTokenTotalSupply>("wrap_token_total_supply")
       .orderBy("timestamp", "desc");
   }
 
