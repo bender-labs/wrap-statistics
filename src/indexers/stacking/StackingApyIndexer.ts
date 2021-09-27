@@ -33,10 +33,11 @@ export class StackingApyIndexer {
       const result: Array<StackingApy> = [];
       for (const contract of contracts) {
         const currentAvailableRewards = new BigNumber(contract.totalRewards).shiftedBy(-contract.token.decimals);
+        const currentAvailableRewardsForOneWeek = currentAvailableRewards.dividedBy(contract.duration).multipliedBy(2 * 60 * 24 * 7);
         const rewardsPrice = currentWrapPriceInUsd;
         const totalWrapStaked = new BigNumber(contract.totalStaked).shiftedBy(-wrapPrecision);
-        const apy = await this._calculateApy(currentAvailableRewards, rewardsPrice, totalWrapStaked, currentWrapPriceInUsd);
-        const apr = await this._calculateApr(currentAvailableRewards, rewardsPrice, totalWrapStaked, currentWrapPriceInUsd);
+        const apy = await this._calculateApy(currentAvailableRewardsForOneWeek, rewardsPrice, totalWrapStaked, currentWrapPriceInUsd);
+        const apr = await this._calculateApr(currentAvailableRewardsForOneWeek, rewardsPrice, totalWrapStaked, currentWrapPriceInUsd);
         result.push({
           asset: 'WRAP',
           apy: apy.toString(10),
