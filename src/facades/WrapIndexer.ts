@@ -65,15 +65,14 @@ export class WrapIndexer {
         const contracts = response.body.contracts;
         for (const contract of contracts) {
           if (contract.totalRewards) {
-            const token = this._getWrapToken(contract.token, contract.tokenId);
             result.push({
-              token,
-              totalRewards: contract.rewards.totalRewards,
+              token: tokenList.find(t => t.tezosSymbol === "WRAP"),
+              totalRewards: contract.totalRewards,
               totalStaked: contract.totalStaked,
-              startLevel: contract.rewards.startLevel,
-              startTimestamp: contract.rewards.startTimestamp,
+              startLevel: contract.startLevel,
+              startTimestamp: contract.startTimestamp,
               farmingContract: contract.contract,
-              duration: contract.rewards.duration
+              duration: contract.duration
             });
           }
         }
