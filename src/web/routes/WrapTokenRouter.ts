@@ -16,8 +16,10 @@ function buildRouter(dependencies: StatisticsDependencies): Router {
   });
 
   router.get('/supply', async (req: Request, res: Response) => {
+    const supply = await supplyQuery.circulatingSupply();
     return res.json({
-      circulating: await supplyQuery.circulatingSupply(),
+      circulating: supply.value,
+      burned: supply.burned,
       total: "100000000"
     });
   });

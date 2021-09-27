@@ -9,8 +9,8 @@ export class WrapTokenTotalSupplyQuery {
     this._wrapTokenTotalSupplyRepository = new WrapTokenTotalSupplyRepository(dbClient);
   }
 
-  async circulatingSupply(): Promise<string> {
-    return (await this._wrapTokenTotalSupplyRepository.last()).value;
+  async circulatingSupply(): Promise<WrapTokenTotalSupply> {
+    return this._wrapTokenTotalSupplyRepository.last();
   }
 
   private readonly _dbClient: Knex;
