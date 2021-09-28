@@ -34,6 +34,7 @@ export class StackingApyIndexer {
       for (const contract of contracts) {
         const currentAvailableRewards = new BigNumber(contract.totalRewards).shiftedBy(-contract.token.decimals);
         const currentAvailableRewardsForOneWeek = currentAvailableRewards.dividedBy(contract.duration).multipliedBy(2 * 60 * 24 * 7);
+        const currentAvailableRewardsForOneDay = currentAvailableRewards.dividedBy(contract.duration).multipliedBy(2 * 60 * 24);
         const rewardsPrice = currentWrapPriceInUsd;
         const totalWrapStaked = new BigNumber(contract.totalStaked).shiftedBy(-wrapPrecision);
         const apy = await this._calculateApy(currentAvailableRewardsForOneWeek, rewardsPrice, totalWrapStaked, currentWrapPriceInUsd);
@@ -42,8 +43,8 @@ export class StackingApyIndexer {
           asset: 'WRAP',
           apy: apy.toString(10),
           apr: apr.toString(10),
-          totalRewards: currentAvailableRewards.toString(10),
-          totalRewardsInUsd: currentAvailableRewards.multipliedBy(rewardsPrice).toString(10),
+          totalRewardsPerDay: currentAvailableRewardsForOneDay.toString(10),
+          totalRewardsPerDayInUsd: currentAvailableRewardsForOneDay.multipliedBy(rewardsPrice).toString(10),
           totalStaked: totalWrapStaked.toString(10),
           totalStakedInUsd: totalWrapStaked.multipliedBy(currentWrapPriceInUsd).toString(10),
           startLevel: contract.startLevel.toString(),

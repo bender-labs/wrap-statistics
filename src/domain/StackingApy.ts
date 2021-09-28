@@ -2,8 +2,8 @@ export interface StackingApy {
   asset: string;
   apy: string;
   apr: string;
-  totalRewards: string,
-  totalRewardsInUsd: string,
+  totalRewardsPerDay: string,
+  totalRewardsPerDayInUsd: string,
   totalStaked: string,
   totalStakedInUsd: string,
   startLevel: string,
