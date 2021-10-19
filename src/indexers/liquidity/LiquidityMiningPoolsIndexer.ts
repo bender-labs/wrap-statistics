@@ -82,6 +82,7 @@ export class LiquidityMiningPoolsIndexer {
         const lpSupply = new BigNumber(quipuStorage.storage.total_supply);
         const wrapRewardsPerBlock = new BigNumber(farmingStorage.farm.plannedRewards.rewardPerBlock).shiftedBy(-8);
         const totalDollarsInLiquidityPool = lpStaked.dividedBy(lpSupply).multipliedBy(tezInPool).multipliedBy(new BigNumber(xtzPriceInDollars.value)).multipliedBy(2);
+        const totalXTZInLiquidityPool = lpStaked.dividedBy(lpSupply).multipliedBy(tezInPool).multipliedBy(2);
         const wrapRewardsPerDay = wrapRewardsPerBlock.multipliedBy(60 / blockDurationInSeconds).multipliedBy(60 * 24);
         const wrapRewardsPerDayInUsd = wrapRewardsPerDay.multipliedBy(currentWrapPriceInUsd);
         const apy = wrapRewardsPerDayInUsd.dividedBy(totalDollarsInLiquidityPool).plus(1).exponentiatedBy(365).minus(1).multipliedBy(100);
@@ -95,6 +96,7 @@ export class LiquidityMiningPoolsIndexer {
           totalRewardsPerDay: wrapRewardsPerDay.toString(10),
           totalRewardsPerDayInUsd: wrapRewardsPerDayInUsd.toString(10),
           totalStakedInUsd: totalDollarsInLiquidityPool.toString(10),
+          totalStaked: totalXTZInLiquidityPool.toString(10),
           farmingContract: program.farmingContract,
           quipuswapContract: program.quipuswapContract,
           ...runningStats

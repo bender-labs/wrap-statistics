@@ -6,6 +6,7 @@ export interface LiquidityMiningApy {
   totalRewardsPerDay: string;
   totalRewardsPerDayInUsd: string;
   totalStakedInUsd: string;
+  totalStaked: string;
   farmingContract: string;
   quipuswapContract: string;
   running: boolean;
